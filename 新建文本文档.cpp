@@ -16,7 +16,7 @@ struct pcb { /* 定义进程控制块PCB */
 }*ready = NULL, *p;
 typedef struct pcb PCB;
 pcb** tempArr;
-int* tempTime;
+double* tempTime;
 int doneIndex4tempTime=0;
 int doneIndex4tempArr=0;
 int num4tempArr=0;
@@ -76,7 +76,7 @@ input() /* 建立进程控制块函数*/
 	//clrscr(); /*清屏*/
 	printf("\n 请输入进程total number?");
 	scanf("%d", &num4tempArr);
-	tempTime=(int*)malloc(num4tempArr*sizeof(int));
+	tempTime=(double*)malloc(num4tempArr*sizeof(int));
 	tempArr=(pcb**)malloc(num4tempArr*sizeof(p));
 	for (int i = 0; i<num4tempArr; i++)
 	{
@@ -95,13 +95,13 @@ input() /* 建立进程控制块函数*/
 /*		printf("\n 输入arriveTime:");
 		scanf("%d", &p->arriveTime);*/
 
-		printf("\n 输入进程运行时间in need :");
+		printf("\n 输入进程运行时间in need : ");
 		scanf("%d", &p->needTime);
 		printf("\n");
 		p->runTime = 0; p->state = 'w';
 		p->link = NULL;
 		tempArr[i]=p;
-		arriveTime[i]=0;
+		tempTime[i]=0;
 	}
 	// 选择排序
 	pcb* minP=tempArr[0];pcb* tempP=tempArr[0];
@@ -159,8 +159,8 @@ check() /* 建立进程查看函数 */
 destroy() /*建立进程撤消函数(进程运行结束,撤消进程)*/
 {
 	printf("\n 进程 [%s] 已完成.\n", p->name);
-	tempTime[doneIndex4tempTime++]=(p->finishTime-p->arriveTime)/p->needTime;
-	printf("\n 进程 [%s} 的带权周转时间为=%d\n", p->name,tempTime[doneIndex4tempTime-1]);
+	tempTime[doneIndex4tempTime++]=(p->finishTime-p->arriveTime)*1.0/p->needTime;
+	printf("\n 进程 [%s] 的带权周转时间为=%lf\n", p->name,tempTime[doneIndex4tempTime-1]);
 	free(p);
 	p=NULL;
 }
@@ -190,14 +190,13 @@ main() /*主函数*/
 	char ch;
 		relativeTime=0;
 		
-		printf("\n 请输入time slice?");
+		printf("\n 请输入time slice? ");
 		scanf("%d", &slot);
 		
 	input();
 	len = space();
 	while (doneIndex4tempArr<num4tempArr||(len != 0 && ready != NULL)||((p!=NULL)&&p->runTime<p->needTime) )
 	//while(doneIndex4tempArr<num4tempArr)
-	//(len != 0 && ready != NULL)
 	{
 		ch = getchar();
 		h++;
@@ -234,5 +233,10 @@ main() /*主函数*/
         ch = getchar();
 	}
 	printf("\n\n 进程已经完成.\n");
+	double sum=0;
+	for(int i=0;i<num4tempArr;i++){
+	    sum+=tempTime[i];
+	}
+	printf("\n 平均带权周转时间为=%lf\n", sum/num4tempArr);
 	ch = getchar();
 }
