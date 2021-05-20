@@ -13,7 +13,7 @@ struct pcb { /* 定义进程控制块PCB */
 	int needTime;
 	int runTime;
 	struct pcb* link;
-}*ready = NULL, *p;
+}*ready = NULL, *p=NULL;
 typedef struct pcb PCB;
 pcb** tempArr;
 double* tempTime;
@@ -42,15 +42,15 @@ int num4tempArr=0;
 //}
 sort(){
         if(ready==NULL){
-            if(doneIndex4tempArr<num4tempArr){
+            if(p==NULL&&doneIndex4tempArr<num4tempArr){
                 ready=tempArr[doneIndex4tempArr];
 				relativeTime=tempArr[doneIndex4tempArr]->arriveTime;
                 doneIndex4tempArr++;
             }
             PCB *first, *second=ready;
             for(;second!=NULL&&second->link!=NULL;second=second->link);
-            for(;doneIndex4tempArr<num4tempArr&&
-            tempArr[doneIndex4tempArr]->arriveTime<=relativeTime;doneIndex4tempArr++){
+            for(;second!=NULL&&doneIndex4tempArr<num4tempArr&&
+            tempArr[doneIndex4tempArr]->arriveTime<=relativeTime+slot;doneIndex4tempArr++){
                         second->link=tempArr[doneIndex4tempArr];
                         second=second->link;
             }
@@ -60,7 +60,7 @@ sort(){
         	for(;second->link!=NULL;second=second->link);
 
             for(;doneIndex4tempArr<num4tempArr&&
-            tempArr[doneIndex4tempArr]->arriveTime<=relativeTime;doneIndex4tempArr++){
+            tempArr[doneIndex4tempArr]->arriveTime<=relativeTime+slot;doneIndex4tempArr++){
                         second->link=tempArr[doneIndex4tempArr];
                         second=second->link;
             }
@@ -92,8 +92,8 @@ input() /* 建立进程控制块函数*/
 //		printf("\n 输入进程优先数:");
 //		scanf("%d", &p->super);
 
-/*		printf("\n 输入arriveTime:");
-		scanf("%d", &p->arriveTime);*/
+		printf("\n 输入arriveTime:");
+		scanf("%d", &p->arriveTime);
 
 		printf("\n 输入进程运行时间in need : ");
 		scanf("%d", &p->needTime);
@@ -119,6 +119,7 @@ input() /* 建立进程控制块函数*/
     for(int i=0;i<num4tempArr;i++){
         printf("i=%d,arriveTime=%d\n",i,tempArr[i]->arriveTime);
 	}
+	p=NULL;
 	sort(); /* 调用sort函数*/
 }
 int space()
@@ -141,7 +142,7 @@ disp(PCB * pr) /*建立进程显示函数,用于显示当前进程*/
 	printf("\t|%d\t", relativeTime);
 	printf("\t|%d\t", slot);
 	printf("\n");
-	printf("relativeTime is the time at starting this slice");
+	printf("relativeTime is the time at starting this slice!\n");
 }
 check() /* 建立进程查看函数 */
 {
