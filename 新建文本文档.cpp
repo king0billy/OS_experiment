@@ -42,34 +42,31 @@ sort(){
         if(ready==NULL){
             if(doneIndex4tempArr<num4tempArr){
                 ready=tempArr[doneIndex4tempArr];
-                //if(doneIndex4tempArr==0)
-					relativeTime=tempArr[doneIndex4tempArr]->arriveTime;
+				relativeTime=tempArr[doneIndex4tempArr]->arriveTime;
                 doneIndex4tempArr++;
-                }
+            }
+            PCB *first, *second=ready;if(second==NULL)break;
+            for(;second->link!=NULL;second=second->link);
+            for(;doneIndex4tempArr<num4tempArr&&
+            tempArr[doneIndex4tempArr]->arriveTime<=relativeTime;doneIndex4tempArr++){
+                        second->link=tempArr[doneIndex4tempArr];
+                        second=second->link;
+            }
         }
 		else{
 			PCB *first, *second=ready;
         	for(;second->link!=NULL;second=second->link);
 
-            if(doneIndex4tempArr<num4tempArr){
-                int i=doneIndex4tempArr;
-                for(;tempArr[i]->arriveTime<=relativeTime;i++){
-                            /*first=ready;*/
-                            /*first=first->link;*/
-                            second->link=tempArr[i];
-                            second=second->link;
-                }
-                doneIndex4tempArr=i;
-
-                second->link=p;
-                //ready=ready->link;
+            for(;doneIndex4tempArr<num4tempArr&&
+            tempArr[doneIndex4tempArr]->arriveTime<=relativeTime;doneIndex4tempArr++){
+                        second->link=tempArr[doneIndex4tempArr];
+                        second=second->link;
             }
 
-            else{
                 second->link=p;
-               // ready=ready->link;
             }
-		}
+
+		
 }
 	
 input() /* 建立进程控制块函数*/
@@ -85,8 +82,12 @@ input() /* 建立进程控制块函数*/
 	{
 		printf("\n 进程号No.%d:\n", i);
 		p = getpch(PCB);
-		printf("\n 输入进程名:");
-		scanf("%s", p->name);
+
+/*		printf("\n 输入进程名:");
+		scanf("%s", p->name);*/
+
+		p->name[0]=i;
+		p->name[1]='\0';
 
 //		printf("\n 输入进程优先数:");
 //		scanf("%d", &p->super);
@@ -135,8 +136,8 @@ disp(PCB * pr) /*建立进程显示函数,用于显示当前进程*/
 	printf("|%c\t", pr->state);
 	printf("|%d\t", pr->needTime);
 	printf("|%d\t", pr->runTime);
-	printf("|%d\t", relativeTime);
-	printf("|%d\t", slot);
+	printf("\t|%d\t", relativeTime);
+	printf("\t|%d\t", slot);
 	printf("\n");
 	printf("relativeTime is the time at starting this slice");
 }
@@ -190,8 +191,9 @@ main() /*主函数*/
 		
 	input();
 	len = space();
-	while (doneIndex4tempArr<num4tempArr||(len != 0 && ready != NULL)|| ((p!=NULL)&&p->runTime<p->needTime) )
+	while (doneIndex4tempArr<num4tempArr||(len != 0 && ready != NULL)||((p!=NULL)&&p->runTime<p->needTime) )
 	//while(doneIndex4tempArr<num4tempArr)
+	//(len != 0 && ready != NULL)
 	{
 		ch = getchar();
 		h++;
