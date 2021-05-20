@@ -45,8 +45,8 @@ sort(){
 				relativeTime=tempArr[doneIndex4tempArr]->arriveTime;
                 doneIndex4tempArr++;
             }
-            PCB *first, *second=ready;if(second==NULL)break;
-            for(;second->link!=NULL;second=second->link);
+            PCB *first, *second=ready;
+            for(;second!=NULL&&second->link!=NULL;second=second->link);
             for(;doneIndex4tempArr<num4tempArr&&
             tempArr[doneIndex4tempArr]->arriveTime<=relativeTime;doneIndex4tempArr++){
                         second->link=tempArr[doneIndex4tempArr];
@@ -64,7 +64,7 @@ sort(){
             }
 
                 second->link=p;
-            }
+        }
 
 		
 }
@@ -86,7 +86,7 @@ input() /* 建立进程控制块函数*/
 /*		printf("\n 输入进程名:");
 		scanf("%s", p->name);*/
 
-		p->name[0]=i;
+		p->name[0]=(char)(i+'0');
 		p->name[1]='\0';
 
 //		printf("\n 输入进程优先数:");
