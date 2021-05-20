@@ -16,6 +16,8 @@ struct pcb { /* 定义进程控制块PCB */
 }*ready = NULL, *p;
 typedef struct pcb PCB;
 pcb** tempArr;
+int* tempTime;
+int doneIndex4tempTime=0;
 int doneIndex4tempArr=0;
 int num4tempArr=0;
 //sort() /* 建立对进程进行优先级排列函数*/
@@ -45,17 +47,23 @@ sort(){
 				relativeTime=tempArr[doneIndex4tempArr]->arriveTime;
                 doneIndex4tempArr++;
             }
+            PCB *first, *second=ready;
+            for(;second!=NULL&&second->link!=NULL;second=second->link);
+            for(;doneIndex4tempArr<num4tempArr&&
+            tempArr[doneIndex4tempArr]->arriveTime<=relativeTime;doneIndex4tempArr++){
+                        second->link=tempArr[doneIndex4tempArr];
+                        second=second->link;
+            }
         }
-        			PCB *first, *second=ready;
-                	for(;second!=NULL&&second->link!=NULL;second=second->link);
-                    for(;second!=NULL&&doneIndex4tempArr<num4tempArr&&
-                    tempArr[doneIndex4tempArr]->arriveTime<=relativeTime;doneIndex4tempArr++){
-                                second->link=tempArr[doneIndex4tempArr];
-                                second=second->link;
-                    }
-		if(ready!=NULL){
+		else{
+			PCB *first, *second=ready;
+        	for(;second->link!=NULL;second=second->link);
 
-
+            for(;doneIndex4tempArr<num4tempArr&&
+            tempArr[doneIndex4tempArr]->arriveTime<=relativeTime;doneIndex4tempArr++){
+                        second->link=tempArr[doneIndex4tempArr];
+                        second=second->link;
+            }
                 second->link=p;
         }
 
@@ -64,14 +72,13 @@ sort(){
 	
 input() /* 建立进程控制块函数*/
 {
-//	int i, num;
-	int i;
 	system("cls");
 	//clrscr(); /*清屏*/
 	printf("\n 请输入进程total number?");
 	scanf("%d", &num4tempArr);
+	tempTime=(int*)malloc(num4tempArr*sizeof(int));
 	tempArr=(pcb**)malloc(num4tempArr*sizeof(p));
-	for (i = 0; i<num4tempArr; i++)
+	for (int i = 0; i<num4tempArr; i++)
 	{
 		printf("\n 进程号No.%d:\n", i);
 		p = getpch(PCB);
@@ -94,7 +101,9 @@ input() /* 建立进程控制块函数*/
 		p->runTime = 0; p->state = 'w';
 		p->link = NULL;
 		tempArr[i]=p;
+		arriveTime[i]=0;
 	}
+	// 选择排序
 	pcb* minP=tempArr[0];pcb* tempP=tempArr[0];
 	for(int i=0,minI=i;i<num4tempArr;i++){
         minI=i;
@@ -114,13 +123,13 @@ input() /* 建立进程控制块函数*/
 }
 int space()
 {
-	int l = 0; PCB* pr = ready;
+	int length = 0; PCB* pr = ready;
 	while (pr != NULL)
 	{
-		l++;
+		length++;
 		pr = pr->link;
 	}
-	return(l);
+	return(length);
 }
 disp(PCB * pr) /*建立进程显示函数,用于显示当前进程*/
 {
@@ -150,6 +159,8 @@ check() /* 建立进程查看函数 */
 destroy() /*建立进程撤消函数(进程运行结束,撤消进程)*/
 {
 	printf("\n 进程 [%s] 已完成.\n", p->name);
+	tempTime[doneIndex4tempTime++]=(p->finishTime-p->arriveTime)/p->needTime;
+	printf("\n 进程 [%s} 的带权周转时间为=%d\n", p->name,tempTime[doneIndex4tempTime-1]);
 	free(p);
 	p=NULL;
 }
