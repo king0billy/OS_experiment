@@ -45,23 +45,16 @@ sort(){
 				relativeTime=tempArr[doneIndex4tempArr]->arriveTime;
                 doneIndex4tempArr++;
             }
-            PCB *first, *second=ready;
-            for(;second!=NULL&&second->link!=NULL;second=second->link);
-            for(;doneIndex4tempArr<num4tempArr&&
-            tempArr[doneIndex4tempArr]->arriveTime<=relativeTime;doneIndex4tempArr++){
-                        second->link=tempArr[doneIndex4tempArr];
-                        second=second->link;
-            }
         }
-		else{
-			PCB *first, *second=ready;
-        	for(;second->link!=NULL;second=second->link);
+        			PCB *first, *second=ready;
+                	for(;second!=NULL&&second->link!=NULL;second=second->link);
+                    for(;second!=NULL&&doneIndex4tempArr<num4tempArr&&
+                    tempArr[doneIndex4tempArr]->arriveTime<=relativeTime;doneIndex4tempArr++){
+                                second->link=tempArr[doneIndex4tempArr];
+                                second=second->link;
+                    }
+		if(ready!=NULL){
 
-            for(;doneIndex4tempArr<num4tempArr&&
-            tempArr[doneIndex4tempArr]->arriveTime<=relativeTime;doneIndex4tempArr++){
-                        second->link=tempArr[doneIndex4tempArr];
-                        second=second->link;
-            }
 
                 second->link=p;
         }
