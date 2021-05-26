@@ -35,7 +35,7 @@ SubAreaList initSubArea() {
 	p->addr = 0;
 	p->size = MEMORY_SIZE;
 	p->stat = FREE;
-	p->pid = -1;
+	p->pid = -99;
 	p->pre = NULL;
 	p->next = NULL;
 
@@ -56,7 +56,7 @@ int alloc(int pid, int psize, SubAreaList p) {
 		newSubArea->addr = p->addr + psize;
 		newSubArea->size = p->size - psize;
 		newSubArea->stat = FREE;
-		newSubArea->pid = -1;
+		newSubArea->pid = -99;
 
 		p->size = psize;
 		p->stat = ALLOCED;
@@ -137,7 +137,7 @@ int bfAlloc(int pid, int psize) {
 //最坏适应算法
 SubAreaList wfFindFreeSubArea(int psize) {
 	SubAreaList p = head, maxP = NULL;
-	int maxSize = -1;
+	int maxSize = -99;
 
 	while (p) {
 		if (p->stat == FREE && p->size >= psize) {
@@ -202,12 +202,12 @@ int freeAlloc(int pid) {
 			p->next = nextNode->next;
 			nextNode->next->pre = p;
 			p->stat = FREE;
-			p->pid = -1;
+			p->pid = -99;
 
 			free(nextNode);
 		} else {
 			p->stat = FREE;
-			p->pid = -1;
+			p->pid = -99;
 		}
 	}
 
@@ -235,7 +235,7 @@ void disAllocGraph(int prec) {
 		p = p->next;
 	}
 	addr[n] = MEMORY_SIZE;
-	pid[n++] = -1;
+	pid[n++] = -99;
 	if (minSize < 10) {
 		printf("内存间隔过小，不显示分配图\n");
 		return;
@@ -251,7 +251,7 @@ void disAllocGraph(int prec) {
 
 			if (l == 1 && i == addr[k]/prec +
 						(addr[k+1]/prec-addr[k]/prec)/2) {
-				if (pid[k] != -1) {
+				if (pid[k] != -99) {
 					printf("%d", pid[k]);
 					i = pid[k] < 10 ? i+1 : i+2;
 				}
@@ -297,19 +297,22 @@ void displayAlloc() {
 	printf("\n|%4s\t|%3s\t|%3s\t|%3s\n", "分区号","起始地址", "分区大小", "分区状态");
 
 	while (p) {
-		printf("|%3d\t|%3d\t\t|%3d\t\t|%3d\n",p->pid, p->addr,p->size, p->stat);
+		printf("|%3d\t|%3d\t\t|%3d\t\t|",p->pid, p->addr,p->size);
+		if(p->stat==1)printf("已分配");
+		else printf("空闲");
+		printf("\n");
 		p = p->next;
 	}
 
 	printf("\n");
-	disAllocGraph(10);
+	//disAllocGraph(10);
 
-	printSepLine();
+	//printSepLine();
 }
 
 
 void inputCtrl(int (*allocAlogrithm)(int,int)) {
-    system("cls");
+    //system("cls");
 //	system("clear");
 	printf("申请按 1 释放按 2 退出按 9\n");
 	char T[5];
@@ -323,12 +326,13 @@ void inputCtrl(int (*allocAlogrithm)(int,int)) {
             scanf("%d", &size);
 			int ret = allocAlogrithm(pid, size);
 			if (ret) {
-				printf("给作业id %d 分配了  %d KB空间\n", pid, size);
+				//printf("给作业id %d 分配了  %d KB空间\n", pid, size);
+				printf("申请成功");
 				displayAlloc();
 			}
 			else {
-				printf("\n内存不足 分配失败\n\n");
-				printSepLine();
+				printf("\n内存不足 申请失败\n\n");
+				//printSepLine();
 			}
 		} else{
 		    if (T[0] == '2') {
@@ -336,11 +340,12 @@ void inputCtrl(int (*allocAlogrithm)(int,int)) {
                 printf("输入要释放空间的作业id: ");scanf("%d", &pid);
                 int ret = freeAlloc(pid);
                 if (ret) {
-                    printf("作业id %d  已回收\n", pid);
+                    //printf("作业id %d  已回收\n", pid);
+                    printf("释放成功");
                     displayAlloc();
                 } else {
-                    printf("未找到相关作业，回收失败\n\n");
-                    printSepLine();
+                    printf("未找到相关作业，释放失败\n\n");
+                    //printSepLine();
                 }
 		    }
 		    else{
@@ -365,14 +370,16 @@ void bfAllocCtrl() {
 void selectAlogrithm() {
 	    system("cls");
 //	system("clear");
-	printf("\n***********************************\n\n");
-	printf("            请选择你的分配算法           \n\n");
-	printf("             1.首次适应算法                \n");
-	printf("             2.最佳适应算法             \n");
-	printf("\n***********************************\n\n");
+	//printf("***********************************\n");
 
-	char op[20];
-	printf(">  ");
+/*	printf("            请选择你的分配算法           \n");
+	printf("             1.首次适应算法                \n");
+	printf("             2.最佳适应算法             \n");*/
+
+	//printf("***********************************\n\n");
+
+/*	char op[20];
+	//printf(">  ");
 	scanf("%s", op);
 
 	if (!strcmp(op, "1"))
@@ -381,8 +388,9 @@ void selectAlogrithm() {
 		bfAllocCtrl();
 	else {
 		exit(0);
-	}
-
+	}*/
+    printf("最佳适应分配算法\n");
+    bfAllocCtrl();
 }
 
 int main()
