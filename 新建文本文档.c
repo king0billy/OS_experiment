@@ -294,11 +294,10 @@ void displayAlloc() {
 	SubAreaList p = head;
 
 	//printf("\n*****************************************************************************\n");
-	printf("\n%3s %3s %3s %3s %3s\n", "起始", "终止", "长度", "状态", "ID");
+	printf("\n|%4s\t|%3s\t|%3s\t|%3s\n", "分区号","起始地址", "分区大小", "分区状态");
 
 	while (p) {
-		printf("%3d  %3d  %3d  %3d  %3d\n", p->addr, p->addr + p->size-1,
-									p->size, p->stat, p->pid);
+		printf("|%3d\t|%3d\t\t|%3d\t\t|%3d\n",p->pid, p->addr,p->size, p->stat);
 		p = p->next;
 	}
 
@@ -312,148 +311,65 @@ void displayAlloc() {
 void inputCtrl(int (*allocAlogrithm)(int,int)) {
     system("cls");
 //	system("clear");
-	printf("分配输入： A 作业号 大小\n");
-	printf("回收输入： F 作业号\n");
-	printf("退出输入： Q\n\n");
-
+	printf("申请按 1 释放按 2 退出按 9\n");
 	char T[5];
 	scanf("%s", T);
-	while (T[0] != 'Q') {
-		if (T[0] == 'A') {
+	while (T[0] != '9') {
+		if (T[0] == '1') {
 			int pid, size;
-			scanf("%d%d", &pid, &size);
+			printf("输入要申请空间的作业id: ");
+			scanf("%d", &pid );
+            printf("输入大小: ");
+            scanf("%d", &size);
 			int ret = allocAlogrithm(pid, size);
 			if (ret) {
-				printf("作业号 %d  分配  %d KB\n", pid, size);
+				printf("给作业id %d 分配了  %d KB空间\n", pid, size);
 				displayAlloc();
 			}
 			else {
 				printf("\n内存不足 分配失败\n\n");
 				printSepLine();
 			}
-		} else if (T[0] == 'F') {
-			int pid;
-			scanf("%d", &pid);
-			int ret = freeAlloc(pid);
-			if (ret) {
-				printf("作业号 %d  已回收\n", pid);
-				displayAlloc();
-			} else {
-				printf("未找到相关作业，回收失败\n\n");
-				printSepLine();
+		} else{
+		    if (T[0] == '2') {
+                int pid;
+                printf("输入要释放空间的作业id: ");scanf("%d", &pid);
+                int ret = freeAlloc(pid);
+                if (ret) {
+                    printf("作业id %d  已回收\n", pid);
+                    displayAlloc();
+                } else {
+                    printf("未找到相关作业，回收失败\n\n");
+                    printSepLine();
+                }
+		    }
+		    else{
+			    exit(0);
 			}
-		} else
-			exit(0);
+		}
 		scanf("%s", T);
 	}
 }
 
-void fileInputCtrl(int (*allocAlogrithm)(int,int)) {
-	freopen(FILE_NAME, "r", stdin);
-	inputCtrl(allocAlogrithm);
-	freopen("/dev/tty", "r", stdin);
-}
 
 void ffAllocCtrl() {
-	    system("cls");
-//	system("clear");
-	printf("\n--------------------------------------------------\n\n");
-	printf("                   首次适应算法                \n\n");
-	printf("             1)    输入请求序列                \n");
-	printf("             2)   文件输入请求序列              \n");
-	printf("             q)       退出                     \n");
-	printf("\n--------------------------------------------------\n\n");
-
-	char op[20];
-	printf(">  ");
-	scanf("%s", op);
-
-	if (!strcmp(op, "1"))
 		inputCtrl(ffAlloc);
-	else if (!strcmp(op, "2"))
-		fileInputCtrl(ffAlloc);
-	else
-		exit(0);
-}
-
-void nfAllocCtrl() {
-	    system("cls");
-//	system("clear");
-	printf("\n--------------------------------------------------\n\n");
-	printf("                  循环首次适应算法                \n\n");
-	printf("             1)    输入请求序列                \n");
-	printf("             2)   文件输入请求序列              \n");
-	printf("             q)       退出                     \n");
-	printf("\n--------------------------------------------------\n\n");
-
-	char op[20];
-	printf(">  ");
-	scanf("%s", op);
-
-	if (!strcmp(op, "1"))
-		inputCtrl(nfAlloc);
-	else if (!strcmp(op, "2"))
-		fileInputCtrl(nfAlloc);
-	else
-		exit(0);
 }
 
 void bfAllocCtrl() {
-	    system("cls");
-//	system("clear");
-	printf("\n--------------------------------------------------\n\n");
-	printf("                   最佳适应算法                \n\n");
-	printf("             1)    输入请求序列                \n");
-	printf("             2)   文件输入请求序列              \n");
-	printf("             q)       退出                     \n");
-	printf("\n--------------------------------------------------\n\n");
-
-	char op[20];
-	printf(">  ");
-	scanf("%s", op);
-
-	if (!strcmp(op, "1"))
 		inputCtrl(bfAlloc);
-	else if (!strcmp(op, "2"))
-		fileInputCtrl(bfAlloc);
-	else
-		exit(0);
 }
 
-void wfAllocCtrl() {
-	    system("cls");
-//	system("clear");
-	printf("\n--------------------------------------------------\n\n");
-	printf("                   最坏适应算法                \n\n");
-	printf("             1)    输入请求序列                \n");
-	printf("             2)   文件输入请求序列              \n");
-	printf("             q)       退出                     \n");
-	printf("\n--------------------------------------------------\n\n");
-
-	char op[20];
-	printf(">  ");
-	scanf("%s", op);
-
-	if (!strcmp(op, "1"))
-		inputCtrl(wfAlloc);
-	else if (!strcmp(op, "2"))
-		fileInputCtrl(wfAlloc);
-	else
-		exit(0);
-}
 
 
 void selectAlogrithm() {
 	    system("cls");
 //	system("clear");
-	printf("\n--------------------------------------------------\n\n");
-	printf("            内存动态分区分配方式的模拟           \n\n");
-	printf("             1)    首次适应算法                \n");
-	printf("             2)   循环首次适应算法              \n");
-	printf("             3)    最佳适应算法                 \n");
-	printf("             4)    最坏适应算法                 \n");
-	printf("             q)       退出                    \n");
-	printf("\n--------------------------------------------------\n\n");
+	printf("\n***********************************\n\n");
+	printf("            请选择你的分配算法           \n\n");
+	printf("             1.首次适应算法                \n");
+	printf("             2.最佳适应算法             \n");
+	printf("\n***********************************\n\n");
 
 	char op[20];
 	printf(">  ");
@@ -462,11 +378,7 @@ void selectAlogrithm() {
 	if (!strcmp(op, "1"))
 		ffAllocCtrl();
 	else if (!strcmp(op, "2"))
-		nfAllocCtrl();
-	else if (!strcmp(op, "3"))
 		bfAllocCtrl();
-	else if (!strcmp(op, "4"))
-		wfAllocCtrl();
 	else {
 		exit(0);
 	}
