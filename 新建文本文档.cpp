@@ -70,15 +70,16 @@ operateReady(){
 	
 input() /* 建立进程控制块函数*/
 {
-	system("cls");
+	//system("cls");
 	//clrscr(); /*清屏*/
-	printf("\n 请输入进程total number? ");
+	printf("请输入进程total number? ");
 	scanf("%d", &number4Array);
+	printf("\n");
 	Array4Time=(double*)malloc(number4Array*sizeof(int));
 	Array4PCB=(pcb**)malloc(number4Array*sizeof(processorInRunning));
 	for (int i = 0; i<number4Array; i++)
 	{
-		printf("\n 进程号No.%d:\n", i);
+		printf("进程号No.%d:", i);
 		processorInRunning = getpch(PCB);
 
 /*		printf("\n 输入进程名:");
@@ -90,10 +91,10 @@ input() /* 建立进程控制块函数*/
 //		printf("\n 输入进程优先数:");
 //		scanf("%d", &processorInRunning->super);
 
-		printf("\n 输入arriveTime:");
+		printf("输入arriveTime:");
 		scanf("%d", &processorInRunning->arriveTime);
 
-		printf("\n 输入进程运行时间in need : ");
+		printf(" 输入进程运行时间in need : ");
 		scanf("%d", &processorInRunning->needTime);
 		printf("\n");
 		processorInRunning->runTime = 0; processorInRunning->state = 'w';
@@ -131,21 +132,22 @@ int space(){
 }
 disp(PCB * pr) /*建立进程显示函数,用于显示当前进程*/
 {
-	printf("\n qname\t state\t ndtime\t runTime\t relativeTime\t timeSlot\n");
+	printf("\n qname\t state\t ndtime\t runTime\t arriveTime\t finishTime\t relativeTime\t timeSlot\n");
 	printf("|%s\t", pr->name);
 	printf("|%c\t", pr->state);
 	printf("|%d\t", pr->needTime);
 	printf("|%d\t", pr->runTime);
+	printf("\t|%d\t", pr->arriveTime);
+	printf("\t|%d\t", pr->finishTime);
 	printf("\t|%d\t", relativeTime);
 	printf("\t|%d\t", timeSlot);
-	printf("\n");
-	printf("relativeTime is the time at starting this slice!\n");
 }
 check() /* 建立进程查看函数 */
 {
 	PCB* pr;
 	printf("\n **** 当前正在运行的进程是:%s", processorInRunning->name); /*显示当前运行进程*/
 	disp(processorInRunning);
+	printf("\n relativeTime is the time at starting this slice!");
 	pr = ready;
 	printf("\n ****当前就绪队列状态为:\n"); /*显示就绪队列状态*/
 	while (pr != NULL)
@@ -153,12 +155,14 @@ check() /* 建立进程查看函数 */
 		disp(pr);
 		pr = pr->link;
 	}
+	printf("\n relativeTime is the time at starting this slice!\n");
 }
 destroy() /*建立进程撤消函数(进程运行结束,撤消进程)*/
 {
-	printf("\n 进程 [%s] 已完成.\n", processorInRunning->name);
-	Array4Time[doneIndex4Time++]=(processorInRunning->finishTime-processorInRunning->arriveTime)*1.0/processorInRunning->needTime;
-	printf("\n 进程 [%s] 的带权周转时间为=%lf\n", processorInRunning->name,Array4Time[doneIndex4Time-1]);
+	printf("\n 进程 [%s] 已完成.", processorInRunning->name);
+	//disp(processorInRunning);
+	Array4Time[doneIndex4Time++]=(processorInRunning->finishTime - processorInRunning->arriveTime)*1.0/processorInRunning->needTime;
+	printf("\n 进程 [%s] 的带权周转时间为=%lf", processorInRunning->name,Array4Time[doneIndex4Time-1]);
 	free(processorInRunning);
 	processorInRunning=NULL;
 }
@@ -166,7 +170,7 @@ running() /* 建立进程就绪函数(进程运行时间到,置就绪状态*/
 {
 /*    if(processorInRunning==NULL)operateReady();*/
     if (processorInRunning->runTime+timeSlot >= processorInRunning->needTime){
-        relativeTime+=processorInRunning->needTime-processorInRunning->runTime;
+        relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
         processorInRunning->finishTime=relativeTime;//!!!!!!!!!!!!!
         processorInRunning->runTime=processorInRunning->needTime;
         destroy(); /* 调用destroy函数*/
@@ -185,7 +189,7 @@ main() /*主函数*/
 	int lengthOfReady, h = 0;
 	char ch;
 		relativeTime=0;
-		printf("\n 请输入time slice? ");
+		printf("请输入time slice? ");
 		scanf("%d", &timeSlot);
 	input();
 	lengthOfReady = space();
@@ -193,7 +197,7 @@ main() /*主函数*/
 	{
 		ch = getchar();
 		h++;
-		printf("\n The execute number:%d \n", h);
+		printf("\n The execute number:%d ", h);
 
             if(ready!=NULL){
                 processorInRunning = ready;
