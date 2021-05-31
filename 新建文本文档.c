@@ -200,10 +200,10 @@ int freeAlloc(int pid) {
 			SubAreaList nextNode = p->next;
 			p->size += nextNode->size;
 			p->next = nextNode->next;
-			nextNode->next->pre = p;
+			if(nextNode->next!=NULL)nextNode->next->pre = p;
 			p->stat = FREE;
 			p->pid = -99;
-
+//todo
 			free(nextNode);
 		} else {
 			p->stat = FREE;
@@ -372,13 +372,13 @@ void selectAlogrithm() {
 //	system("clear");
 	//printf("***********************************\n");
 
-/*	printf("            请选择你的分配算法           \n");
-	printf("             1.首次适应算法                \n");
-	printf("             2.最佳适应算法             \n");*/
+	//printf("            请选择你的分配算法           \n");
+	printf("             按1_首次适应算法                \n");
+	printf("             按2_最佳适应算法             \n");
 
 	//printf("***********************************\n\n");
 
-/*	char op[20];
+	char op[20];
 	//printf(">  ");
 	scanf("%s", op);
 
@@ -388,9 +388,9 @@ void selectAlogrithm() {
 		bfAllocCtrl();
 	else {
 		exit(0);
-	}*/
-    printf("最佳适应分配算法\n");
-    bfAllocCtrl();
+	}
+/*    printf("<<最佳适应分配算法>>\n");
+    bfAllocCtrl();*/
 }
 
 int main()
