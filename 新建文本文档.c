@@ -34,6 +34,41 @@
         printf("%d\t",block4->data.pageNum);
         printf("\n");
     }
+    void OPT(int pageNum, int virAddr, int pos,Block *p,char* shit){
+        //OPT页面置换
+        int allBlockPageNum[4]; //记录已装入内存的页地址
+        for(int i = 0; i < 4; i++){
+            allBlockPageNum[i] = p->data.pageNum;
+            p = p->next;
+        }
+        int nextAddr[4]; //记录已装入内存的页地址下次在指令流中出现的位置
+        for(int i = 0; i < 4; i++){
+            for(int j = pos; j < 320; j++){
+                if(allBlockPageNum[i] == pageAddr[j]) //找到第一个位置即停止
+                {
+                    nextAddr[i] = j;
+                    break;
+                }
+            }
+        }
+        int temp = 0; //页地址
+        int blockPos; //内存块的地址
+        //选出距离最远的页地址在内存块中对应的位置
+        for(int i = 0; i < 4; i++) {
+            if(nextAddr[i] > temp){
+                temp = nextAddr[i];
+                blockPos = i;
+            }
+        }
+        for(int i = 0; i < 4; i++){
+            if(p->data.blockNum == blockPos){
+                p->data.pageNum = pageNum;
+                count++;
+                print(pos,virAddr,pageNum,p,"T&R");
+            }
+            p = p->next;
+        }
+    }
     void initialize() //初始化
     {
         block1 = (BlockList)malloc(sizeof(Block));
@@ -93,41 +128,13 @@
             if(p->data.pageNum == -1) //块为空闲
             {
                 p->data.pageNum = pageNum;
-                count++; //缺页次数+1
-    /*            printf("调入的第%d条", pos);
-                printf("指令地址：%d \n", virAddr);
-                printf("指令未装入内存！页面置换完成！\n用户指令第%d页第%d条的物理地址为：第%d块第%d条 \n\n", pageNum, (virAddr % 10), p->data.blockNum, (virAddr % 10));*/
-                
-/*                printf("%d\t", pos);
-                printf("%d\t", virAddr);
-                printf("%d\t", pageNum);
-                printf("%d\t", p->data.blockNum);
-                printf("T\t");
-                printf("%d\t",block1->data.pageNum);
-                printf("%d\t",block2->data.pageNum);
-                printf("%d\t",block3->data.pageNum);
-                printf("%d\t",block4->data.pageNum);
-                printf("\n");*/
+                count++; //缺页次数+1R
                 print(pos,virAddr,pageNum,p,"T");
                 return 1;
             }
 
             if(p->data.pageNum == pageNum)
             {
-    /*            printf("调入的第%d条", pos);
-                printf("指令地址：%d \n", virAddr);
-                printf("指令已在内存中！\n用户指令第%d页第%d条的物理地址为：第%d块第%d条 \n\n", pageNum, (virAddr % 10), p->data.blockNum, (virAddr % 10));*/
-
-/*                printf("%d\t", pos);
-                printf("%d\t", virAddr);
-                printf("%d\t", pageNum);
-                printf("%d\t", p->data.blockNum);
-                printf("F\t");
-                printf("%d\t",block1->data.pageNum);
-                printf("%d\t",block2->data.pageNum);
-                printf("%d\t",block3->data.pageNum);
-                printf("%d\t",block4->data.pageNum);
-                printf("\n");*/
                 print(pos,virAddr,pageNum,p,"F");
                 return 1;
             }
@@ -135,8 +142,9 @@
             p = p->next;
         }
 
+        OPT(pos,virAddr,pageNum,p,"T&R");
         //OPT页面置换
-        int allBlockPageNum[4]; //记录已装入内存的页地址
+        /*int allBlockPageNum[4]; //记录已装入内存的页地址
 
         for(int i = 0; i < 4; i++)
         {
@@ -176,26 +184,12 @@
             {
                 p->data.pageNum = pageNum;
                 count++;
-
-    /*            printf("调入的第%d条", pos);
-                printf("指令地址：%d \n", virAddr);
-                printf("指令未装入内存且内存块已满！页面置换完成！\n用户指令第%d页第%d条的物理地址为：第%d块第%d条 \n\n", pageNum, (virAddr % 10), p->data.blockNum, (virAddr % 10));*/
-/*                printf("%d\t", pos);
-                printf("%d\t", virAddr);
-                printf("%d\t", pageNum);
-                printf("%d\t", p->data.blockNum);
-                printf("T&R\t");
-                printf("%d\t",block1->data.pageNum);
-                printf("%d\t",block2->data.pageNum);
-                printf("%d\t",block3->data.pageNum);
-                printf("%d\t",block4->data.pageNum);
-                printf("\n");*/
                 print(pos,virAddr,pageNum,p,"T&R");
             }
 
             p = p->next;
         }
-
+*/
         return 1;
     }
 
