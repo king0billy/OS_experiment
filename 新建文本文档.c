@@ -81,10 +81,10 @@
         block3->data.firstInIndex = 321;
         block4->data.firstInIndex = 321;
 
-        block1->data.leastRecentlyUsedIndex = -99;
-        block2->data.leastRecentlyUsedIndex = -99;
-        block3->data.leastRecentlyUsedIndex = -99;
-        block4->data.leastRecentlyUsedIndex = -99;
+        block1->data.leastRecentlyUsedIndex = 321;
+        block2->data.leastRecentlyUsedIndex = 321;
+        block3->data.leastRecentlyUsedIndex = 321;
+        block4->data.leastRecentlyUsedIndex = 321;
 
         block1->next = block2;
         block2->next = block3;
@@ -180,12 +180,12 @@
     int LRU(int pageNum, int virAddr, int pos){
         Block *p = block1;
         if(1==commonPack(pageNum,virAddr,pos,p))return 1;
-        int maxLIndex=-99;
+        int minLIndex=321;
         for(int i=0;i<4;p=p->next,i++){
-            maxLIndex=maxLIndex>p->data.leastRecentlyUsedIndex?maxLIndex:p->data.leastRecentlyUsedIndex;
+            minLIndex=minLIndex<p->data.leastRecentlyUsedIndex?minLIndex:p->data.leastRecentlyUsedIndex;
         }
         for(int i=0;i<4;p=p->next,i++){
-            if(p->data.leastRecentlyUsedIndex==maxLIndex){
+            if(p->data.leastRecentlyUsedIndex==minLIndex){
                 p->data.pageNum = pageNum;
                 p->data.firstInIndex=pos;
                 p->data.leastRecentlyUsedIndex=pos;
