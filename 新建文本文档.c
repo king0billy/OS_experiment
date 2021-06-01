@@ -1,6 +1,6 @@
     #include <stdio.h>
     #include <stdlib.h>
-
+    
     float count = 0; //缺页次数
     int instrAddr[320]; //指令地址流数组
     int pageAddr[320]; //页地址流数组
@@ -9,6 +9,8 @@
     {
         int pageNum; //装进的用户虚存页号
         int blockNum; //块号
+        int firstInIndex;//首次调入内存的index//321
+        int leastRecentlyUsedIndex;//最后一次使用的index//-99
     } Data;
 
     typedef struct BlockNode //单向循环链表
@@ -36,20 +38,25 @@
     }
     int commonPack(int pageNum, int virAddr, int pos,Block *p){
             //遍历所有内存块，若不进行任何操作则遍历结束时候仍指向block1
-            for(int i = 0; i < 4; i++) {
-                //块为空闲
-                if(p->data.pageNum == -1) {
-                    p->data.pageNum = pageNum;
-                    count++; //缺页次数+1R
-                    print(pageNum,virAddr,pos,p,"T");
-                    return 1;
+            //if(type==1){
+                for(int i = 0; i < 4; i++) {
+                    //块为空闲
+                    if(p->data.pageNum == -1) {
+                        p->data.pageNum = pageNum;
+                        count++; //缺页次数+1R
+                        print(pageNum,virAddr,pos,p,"T");
+                        p->data.firstInIndex=pos;
+                        p->data.leastRecentlyUsedIndex=pos;
+                        return 1;
+                    }
+                    if(p->data.pageNum == pageNum){
+                        print(pageNum,virAddr,pos,p,"F");
+                        p->data.leastRecentlyUsedIndex=pos;
+                        return 1;
+                    }
+                    p = p->next;
                 }
-                if(p->data.pageNum == pageNum){
-                    print(pageNum,virAddr,pos,p,"F");
-                    return 1;
-                }
-                p = p->next;
-            }
+           // }
             return 0;
     }
     void initialize() //初始化
@@ -68,6 +75,16 @@
         block2->data.blockNum = 1;
         block3->data.blockNum = 2;
         block4->data.blockNum = 3;
+
+        block1->data.firstInIndex = 321;
+        block2->data.firstInIndex = 321;
+        block3->data.firstInIndex = 321;
+        block4->data.firstInIndex = 321;
+
+        block1->data.leastRecentlyUsedIndex = -99;
+        block2->data.leastRecentlyUsedIndex = -99;
+        block3->data.leastRecentlyUsedIndex = -99;
+        block4->data.leastRecentlyUsedIndex = -99;
 
         block1->next = block2;
         block2->next = block3;
@@ -145,13 +162,37 @@
     int FIFO(int pageNum, int virAddr, int pos){
         Block *p = block1;
         if(1==commonPack(pageNum,virAddr,pos,p))return 1;
-
+        int minFIndex=321;
+        for(int i=0;i<4;p=p->next,i++){
+            minFIndex=minFIndex<p->data.firstInIndex?minFIndex:p->data.firstInIndex;
+        }
+        for(int i=0;i<4;p=p->next,i++){
+            if(p->data.firstInIndex==minFIndex){
+                p->data.pageNum = pageNum;
+                p->data.firstInIndex=pos;
+                p->data.leastRecentlyUsedIndex=pos;
+                count++;
+                print(pageNum,virAddr,pos,p,"T&R");
+            }
+        }
         return 1;
     }
     int LRU(int pageNum, int virAddr, int pos){
         Block *p = block1;
         if(1==commonPack(pageNum,virAddr,pos,p))return 1;
-
+        int maxLIndex=-99;
+        for(int i=0;i<4;p=p->next,i++){
+            maxLIndex=maxLIndex>p->data.leastRecentlyUsedIndex?maxLIndex:p->data.leastRecentlyUsedIndex;
+        }
+        for(int i=0;i<4;p=p->next,i++){
+            if(p->data.leastRecentlyUsedIndex==maxLIndex){
+                p->data.pageNum = pageNum;
+                p->data.firstInIndex=pos;
+                p->data.leastRecentlyUsedIndex=pos;
+                count++;
+                print(pageNum,virAddr,pos,p,"T&R");
+            }
+        }
         return 1;
     }
 
@@ -188,9 +229,9 @@
 
     int main()
     {
-        printf("----------最佳置换算法(OPT)请按1----------\n\n");
-        printf("----------先进先出算法(FIFO)请按2----------\n\n");
-        printf("----------最近最久未使用算法(LRU)请按3----------\n\n");
+        printf("----------最佳置换算法(OPT)请按1----------\n");
+        printf("----------先进先出算法(FIFO)请按2----------\n");
+        printf("----------最近最久未使用算法(LRU)请按3----------\n");
 
         initialize();
         calculate();
