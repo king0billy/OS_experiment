@@ -34,44 +34,23 @@
         printf("%d\t",block4->data.pageNum);
         printf("\n");
     }
-    void OPT(int pageNum, int virAddr, int pos,Block *p,char* shit){
-        //OPT页面置换
-        int allBlockPageNum[4]; //记录已装入内存的页地址
-        for(int i = 0; i < 4; i++){
-            allBlockPageNum[i] = p->data.pageNum;
-//if(virAddr==161){printf("allBlockPageNum[%d]=%d\n",i,allBlockPageNum[i]);}
-            p = p->next;
-        }
-        int nextAddr[4]={321,321,321,321};
-        //int nextAddr[4]={0,0,0,0}; //记录已装入内存的页地址下次在指令流中出现的位置
-        //int nextAddr[4]; //记录已装入内存的页地址下次在指令流中出现的位置
-        for(int i = 0; i < 4; i++){
-            for(int j = pos; j < 320; j++){
-                if(allBlockPageNum[i] == pageAddr[j]){ //找到第一个位置即停止
-                    nextAddr[i] = j;
-//if(virAddr==161){printf("nextAddr[%d]=%d\n",i,nextAddr[i]);}
-                    break;
+    int commonPack(int pageNum, int virAddr, int pos,Block *p){
+            //遍历所有内存块，若不进行任何操作则遍历结束时候仍指向block1
+            for(int i = 0; i < 4; i++) {
+                //块为空闲
+                if(p->data.pageNum == -1) {
+                    p->data.pageNum = pageNum;
+                    count++; //缺页次数+1R
+                    print(pageNum,virAddr,pos,p,"T");
+                    return 1;
                 }
+                if(p->data.pageNum == pageNum){
+                    print(pageNum,virAddr,pos,p,"F");
+                    return 1;
+                }
+                p = p->next;
             }
-        }
-        int temp = 0; //页地址
-        int blockPos; //内存块的地址
-        //选出距离最远的页地址在内存块中对应的位置
-        for(int i = 0; i < 4; i++) {
-            if(nextAddr[i] > temp){
-                temp = nextAddr[i];
-                blockPos = i;
-//if(virAddr==161){printf("temp=%d,blockPos=%d\n",temp,blockPos);}
-            }
-        }
-        for(int i = 0; i < 4; i++){
-            if(p->data.blockNum == blockPos){
-                p->data.pageNum = pageNum;
-                count++;
-                print(pageNum,virAddr,pos,p,"T&R");
-            }
-            p = p->next;
-        }
+            return 0;
     }
     void initialize() //初始化
     {
@@ -123,38 +102,19 @@
     }
 
     //pos为所调用页在地址流中的位置
-    int Optimal(int pageNum, int virAddr, int pos) //最佳置换算法
-    {
+    int Optimal(int pageNum, int virAddr, int pos) {
         Block *p = block1;
+        if(1==commonPack(pageNum,virAddr,pos,p))return 1;
 
-        for(int i = 0; i < 4; i++) //遍历所有内存块，若不进行任何操作则遍历结束时候仍指向block1
-        {
-            if(p->data.pageNum == -1) //块为空闲
-            {
-                p->data.pageNum = pageNum;
-                count++; //缺页次数+1R
-                print(pageNum,virAddr,pos,p,"T");
-                return 1;
-            }
-
-            if(p->data.pageNum == pageNum)
-            {
-                print(pageNum,virAddr,pos,p,"F");
-                return 1;
-            }
-
-            p = p->next;
-        }
-
-        OPT(pageNum,virAddr,pos,p,"T&R");
-        /*
         //OPT页面置换
         int allBlockPageNum[4]; //记录已装入内存的页地址
         for(int i = 0; i < 4; i++){
             allBlockPageNum[i] = p->data.pageNum;
             p = p->next;
         }
-        int nextAddr[4]={321,321,321,321}; //记录已装入内存的页地址下次在指令流中出现的位置
+        int nextAddr[4]={321,321,321,321};
+        //int nextAddr[4]={0,0,0,0}; //记录已装入内存的页地址下次在指令流中出现的位置
+        //int nextAddr[4]; //记录已装入内存的页地址下次在指令流中出现的位置
         for(int i = 0; i < 4; i++){
             for(int j = pos; j < 320; j++){
                 if(allBlockPageNum[i] == pageAddr[j]){ //找到第一个位置即停止
@@ -179,20 +139,48 @@
                 print(pageNum,virAddr,pos,p,"T&R");
             }
             p = p->next;
-        }*/
+        }
+        return 1;
+    }
+    int FIFO(int pageNum, int virAddr, int pos){
+        Block *p = block1;
+        if(1==commonPack(pageNum,virAddr,pos,p))return 1;
+
+        return 1;
+    }
+    int LRU(int pageNum, int virAddr, int pos){
+        Block *p = block1;
+        if(1==commonPack(pageNum,virAddr,pos,p))return 1;
+
         return 1;
     }
 
     void calculate() //计算缺页率
     {
+        char trigger[]={'\0','\0'};char* to0;
+        do{
+            fgets(trigger,2,stdin);
+            to0=NULL;to0 = strchr(trigger, '\n');if(to0)*to0 = '\0';  fflush(stdin);
+        }while(trigger[0]<'0'||trigger[0]>'3');
 
         printf("T is true,F is false,R is replace\n");
         printf("NO.\t指令号\tat逻辑\tat物理\t缺页否\t内存块0\t内存块1\t内存块2\t内存块3\n");
-        for(int i = 0; i < 320; i++)
-        {
-            Optimal(pageAddr[i], instrAddr[i], i);
-        }
 
+        if(trigger[0]-48==1){
+            for(int i = 0; i < 320; i++){
+                Optimal(pageAddr[i], instrAddr[i], i);
+            }
+        }
+        else if(trigger[0]-48==2){
+            for(int i = 0; i < 320; i++){
+                FIFO(pageAddr[i], instrAddr[i], i);
+            }
+        }
+        else{
+            for(int i = 0; i < 320; i++){
+                LRU(pageAddr[i], instrAddr[i], i);
+            }
+        }
         printf("\n");
         printf("缺页次数：%.0f\n", count);
         printf("计算得到的缺页率为：%.4f \n", count / 320);
@@ -203,6 +191,7 @@
         printf("----------最佳置换算法(OPT)请按1----------\n\n");
         printf("----------先进先出算法(FIFO)请按2----------\n\n");
         printf("----------最近最久未使用算法(LRU)请按3----------\n\n");
+
         initialize();
         calculate();
 
