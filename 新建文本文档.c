@@ -44,8 +44,7 @@
         int nextAddr[4]; //记录已装入内存的页地址下次在指令流中出现的位置
         for(int i = 0; i < 4; i++){
             for(int j = pos; j < 320; j++){
-                if(allBlockPageNum[i] == pageAddr[j]) //找到第一个位置即停止
-                {
+                if(allBlockPageNum[i] == pageAddr[j]){ //找到第一个位置即停止
                     nextAddr[i] = j;
                     break;
                 }
@@ -64,7 +63,7 @@
             if(p->data.blockNum == blockPos){
                 p->data.pageNum = pageNum;
                 count++;
-                print(pos,virAddr,pageNum,p,"T&R");
+                print(pageNum,virAddr,pos,p,"T&R");
             }
             p = p->next;
         }
@@ -129,67 +128,53 @@
             {
                 p->data.pageNum = pageNum;
                 count++; //缺页次数+1R
-                print(pos,virAddr,pageNum,p,"T");
+                print(pageNum,virAddr,pos,p,"T");
                 return 1;
             }
 
             if(p->data.pageNum == pageNum)
             {
-                print(pos,virAddr,pageNum,p,"F");
+                print(pageNum,virAddr,pos,p,"F");
                 return 1;
             }
 
             p = p->next;
         }
 
-        OPT(pos,virAddr,pageNum,p,"T&R");
+        OPT(pageNum,virAddr,pos,p,"T&R");
+        /*
         //OPT页面置换
-        /*int allBlockPageNum[4]; //记录已装入内存的页地址
-
-        for(int i = 0; i < 4; i++)
-        {
+        int allBlockPageNum[4]; //记录已装入内存的页地址
+        for(int i = 0; i < 4; i++){
             allBlockPageNum[i] = p->data.pageNum;
             p = p->next;
         }
-
         int nextAddr[4]; //记录已装入内存的页地址下次在指令流中出现的位置
-
-        for(int i = 0; i < 4; i++)
-        {
-            for(int j = pos; j < 320; j++)
-            {
-                if(allBlockPageNum[i] == pageAddr[j]) //找到第一个位置即停止
-                {
+        for(int i = 0; i < 4; i++){
+            for(int j = pos; j < 320; j++){
+                if(allBlockPageNum[i] == pageAddr[j]){ //找到第一个位置即停止
                     nextAddr[i] = j;
                     break;
                 }
             }
         }
-
         int temp = 0; //页地址
         int blockPos; //内存块的地址
-
-        for(int i = 0; i < 4; i++) //选出距离最远的页地址在内存块中对应的位置
-        {
-            if(nextAddr[i] > temp)
-            {
+        //选出距离最远的页地址在内存块中对应的位置
+        for(int i = 0; i < 4; i++) {
+            if(nextAddr[i] > temp){
                 temp = nextAddr[i];
                 blockPos = i;
             }
         }
-
-        for(int i = 0; i < 4; i++)
-        {
-            if(p->data.blockNum == blockPos)
-            {
+        for(int i = 0; i < 4; i++){
+            if(p->data.blockNum == blockPos){
                 p->data.pageNum = pageNum;
                 count++;
-                print(pos,virAddr,pageNum,p,"T&R");
+                print(pageNum,virAddr,pos,p,"T&R");
             }
-
             p = p->next;
-        }
-*/
+        }*/
         return 1;
     }
 
