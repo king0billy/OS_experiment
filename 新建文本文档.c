@@ -39,13 +39,17 @@
         int allBlockPageNum[4]; //记录已装入内存的页地址
         for(int i = 0; i < 4; i++){
             allBlockPageNum[i] = p->data.pageNum;
+//if(virAddr==161){printf("allBlockPageNum[%d]=%d\n",i,allBlockPageNum[i]);}
             p = p->next;
         }
-        int nextAddr[4]; //记录已装入内存的页地址下次在指令流中出现的位置
+        int nextAddr[4]={321,321,321,321};
+        //int nextAddr[4]={0,0,0,0}; //记录已装入内存的页地址下次在指令流中出现的位置
+        //int nextAddr[4]; //记录已装入内存的页地址下次在指令流中出现的位置
         for(int i = 0; i < 4; i++){
             for(int j = pos; j < 320; j++){
                 if(allBlockPageNum[i] == pageAddr[j]){ //找到第一个位置即停止
                     nextAddr[i] = j;
+//if(virAddr==161){printf("nextAddr[%d]=%d\n",i,nextAddr[i]);}
                     break;
                 }
             }
@@ -57,6 +61,7 @@
             if(nextAddr[i] > temp){
                 temp = nextAddr[i];
                 blockPos = i;
+//if(virAddr==161){printf("temp=%d,blockPos=%d\n",temp,blockPos);}
             }
         }
         for(int i = 0; i < 4; i++){
@@ -149,7 +154,7 @@
             allBlockPageNum[i] = p->data.pageNum;
             p = p->next;
         }
-        int nextAddr[4]; //记录已装入内存的页地址下次在指令流中出现的位置
+        int nextAddr[4]={321,321,321,321}; //记录已装入内存的页地址下次在指令流中出现的位置
         for(int i = 0; i < 4; i++){
             for(int j = pos; j < 320; j++){
                 if(allBlockPageNum[i] == pageAddr[j]){ //找到第一个位置即停止
