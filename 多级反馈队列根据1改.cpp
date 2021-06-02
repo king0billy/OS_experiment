@@ -12,14 +12,22 @@
         int finishTime;
         int needTime;
         int runTime;
-        struct pcb* link;
+        struct pcb* link= NULL;
+
+        int timeSlot;
+        int belong2Index;
     }*ready = NULL, *processorInRunning=NULL;
     typedef struct pcb PCB;
     PCB** Array4PCB;
+    int amount4PCBArray=0;
+    int doneIndex4PCB=0;
+
     double* Array4Time;
     int doneIndex4Time=0;
-    int doneIndex4PCB=0;
-    int number4Array=0;
+
+    PCB** Multi;
+    int amount4Multi=0;
+
     //operateReady() /* 建立对进程进行优先级排列函数*/
     //{
     //
@@ -42,14 +50,14 @@
     //}
     operateReady(){
         if(ready==NULL){
-            if(processorInRunning==NULL&&doneIndex4PCB<number4Array){
+            if(processorInRunning==NULL&&doneIndex4PCB<amount4PCBArray){
                 ready=Array4PCB[doneIndex4PCB];
                 relativeTime=Array4PCB[doneIndex4PCB]->arriveTime;
                 doneIndex4PCB++;
             }
             PCB  *rear=ready;
             for(;rear!=NULL&&rear->link!=NULL;rear=rear->link);
-            for(;rear!=NULL&&doneIndex4PCB<number4Array&&
+            for(;rear!=NULL&&doneIndex4PCB<amount4PCBArray&&
                Array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+timeSlot;doneIndex4PCB++){
                 rear->link=Array4PCB[doneIndex4PCB];
                 rear=rear->link;
@@ -59,7 +67,7 @@
             PCB *rear=ready;
             for(;rear->link!=NULL;rear=rear->link);
 
-            for(;doneIndex4PCB<number4Array&&
+            for(;doneIndex4PCB<amount4PCBArray&&
             Array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+timeSlot;doneIndex4PCB++){
                         rear->link=Array4PCB[doneIndex4PCB];
                         rear=rear->link;
@@ -72,11 +80,11 @@
         //system("cls");
         //clrscr(); /*清屏*/
         printf("请输入进程total number? ");
-        scanf("%d", &number4Array);
+        scanf("%d", &amount4PCBArray);
         printf("\n");
-        Array4Time=(double*)malloc(number4Array*sizeof(int));
-        Array4PCB=(pcb**)malloc(number4Array*sizeof(processorInRunning));
-        for (int i = 0; i<number4Array; i++){
+        Array4Time=(double*)malloc(amount4PCBArray*sizeof(int));
+        Array4PCB=(pcb**)malloc(amount4PCBArray*sizeof(processorInRunning));
+        for (int i = 0; i<amount4PCBArray; i++){
             printf("进程号No.%d:", i);
             processorInRunning = getpch(PCB);
     /*		printf("\n 输入进程名:");
@@ -97,10 +105,10 @@
         }
         // 选择排序
         pcb* minP=Array4PCB[0];pcb* tempP=Array4PCB[0];
-        for(int i=0,minI=i;i<number4Array;i++){
+        for(int i=0,minI=i;i<amount4PCBArray;i++){
             minI=i;
             minP=Array4PCB[i];
-                for(int j=i;j<number4Array;j++){
+                for(int j=i;j<amount4PCBArray;j++){
                     if(Array4PCB[j]->arriveTime < minP->arriveTime){
                         minI=j;
                         minP=Array4PCB[j];
@@ -108,20 +116,20 @@
                     tempP=Array4PCB[i];Array4PCB[i]=minP;Array4PCB[minI]=tempP;
                 }
             }
-        for(int i=0;i<number4Array;i++){
+        for(int i=0;i<amount4PCBArray;i++){
             printf("i=%d,arriveTime=%d\n",i,Array4PCB[i]->arriveTime);
         }
         processorInRunning=NULL;
         operateReady(); /* 调用sort函数*/
     }
-    int space(){
+/*    int space(){
         int length = 0; PCB* pr = ready;
         while (pr != NULL){
             length++;
             pr = pr->link;
         }
         return(length);
-    }
+    }*/
     /*建立进程显示函数,用于显示当前进程*/
     disp(PCB * pr) {
         printf("\n qname\t state\t ndtime\t runTime\t arriveTime\t finishTime\t relativeTime\t timeSlot\n");
@@ -148,6 +156,21 @@
         }
         printf("\n relativeTime is the time at starting this slice!\n");
     }
+                moveDown(PCB** shit,int index){
+                    PCB* son,rear;
+                    son= Multi[index]->link;
+                    Multi[index]->link=Multi[index]->link->link;
+                    if(index<amount4Multi-1){
+                        for(rear=Multi[index+1];rear->link!=NULL;rear=rear->link);
+                        rear->link=son;
+                        son->belong2Index++;
+                    }
+                }
+                int JudgeNull(){
+                    int index=0;
+                    for(;Multi[index]->link==NULL;index++);
+                    return index;
+                }
     /*建立进程撤消函数(进程运行结束,撤消进程)*/
     destroy() {
         printf("\n 进程 [%s] 已完成.", processorInRunning->name);
@@ -179,11 +202,23 @@
         int lengthOfReady, h = 0;
         char ch;
             relativeTime=0;
-            printf("请输入time slice? ");
-            scanf("%d", &timeSlot);
+/*            printf("请输入time slice?  ");
+            scanf("%d", &timeSlot);*/
+                printf("请输入amount4Multi?  ");
+                scanf("%d", &amount4Multi);
+                Multi=(PCB**)malloc(amount4Multi*sizeof(PCB*));
+                for(int i=0;i<amount4Multi;i++){
+                    printf("请输入%d级队列的timeSlot  ",i);
+                    scanf("%d", Multi[i]->timeSlot);
+                    Multi[i]->belong2Index=i;
+                    Multi[i]->link=0;
+                }
+                printf("前%d均为 FCFS ,第%d为 RR\n"amount4Multi-1,amount4Multi);
         input();
-        lengthOfReady = space();
-        while (doneIndex4PCB<number4Array || (lengthOfReady != 0 && ready != NULL)  ||
+/*        lengthOfReady = space();
+        while (doneIndex4PCB<amount4PCBArray || (lengthOfReady != 0 && ready != NULL)  ||
+            ( (processorInRunning!=NULL) && processorInRunning->runTime<processorInRunning->needTime ) ){*/
+        while (doneIndex4PCB<amount4PCBArray || (ready != NULL)  ||
             ( (processorInRunning!=NULL) && processorInRunning->runTime<processorInRunning->needTime ) ){
             ch = getchar();
             h++;
@@ -210,10 +245,11 @@
         }
         printf("\n\n 进程已经完成.\n");
         double sum=0;
-        for(int i=0;i<number4Array;i++){
+        for(int i=0;i<amount4PCBArray;i++){
             sum+=Array4Time[i];
         }
-        printf("\n 平均带权周转时间为=%lf\n", sum/number4Array);
+        printf("\n 平均带权周转时间为=%lf\n", sum/amount4PCBArray);
         ch = getchar();
         ch = getchar();
     }
+
