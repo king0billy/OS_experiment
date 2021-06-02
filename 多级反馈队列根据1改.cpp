@@ -1,7 +1,7 @@
     #include "stdio.h"
     #include <stdlib.h>
     #include <conio.h>
-    #define getpch(type) (type*)malloc(sizeof(type))
+    #define getType(type) (type*)malloc(sizeof(type))
     //#define NULL 0
     int  timeSlot=0;
     int  relativeTime=0;
@@ -123,33 +123,6 @@
             }
             return 0;
         }
-/*    operateReady(){
-        if(ready==NULL){
-            if(processorInRunning==NULL&&doneIndex4PCB<amount4PCBArray){
-                ready=array4PCB[doneIndex4PCB];
-                relativeTime=array4PCB[doneIndex4PCB]->arriveTime;
-                doneIndex4PCB++;
-            }
-            PCB  *rear=ready;
-            for(;rear!=NULL&&rear->link!=NULL;rear=rear->link);
-            for(;rear!=NULL&&doneIndex4PCB<amount4PCBArray&&
-               array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+timeSlot;doneIndex4PCB++){
-                rear->link=array4PCB[doneIndex4PCB];
-                rear=rear->link;
-            }
-        }
-        else{
-            PCB *rear=ready;
-            for(;rear->link!=NULL;rear=rear->link);
-
-            for(;doneIndex4PCB<amount4PCBArray&&
-            array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+timeSlot;doneIndex4PCB++){
-                        rear->link=array4PCB[doneIndex4PCB];
-                        rear=rear->link;
-            }
-                rear->link=processorInRunning;
-        }
-    }*/
     /* 建立进程控制块函数*/
     input() {
             printf("请输入amount4Multi?  ");
@@ -170,7 +143,7 @@
         array4PCB=(pcb**)malloc(amount4PCBArray*sizeof(processorInRunning));
         for (int i = 0; i<amount4PCBArray; i++){
             printf("进程号No.%d:", i);
-            processorInRunning = getpch(PCB);
+            processorInRunning = (PCB*)malloc(sizeof(PCB));
             processorInRunning->name[0]=(char)(i+'0');
             processorInRunning->name[1]='\0';
             printf("输入arriveTime:");
@@ -242,21 +215,6 @@
         processorInRunning=NULL;
     }
     /* 建立进程就绪函数(进程运行时间到,置就绪状态*/
-/*    running() {
-    *//*    if(processorInRunning==NULL)operateReady();*//*
-        if (processorInRunning->runTime+timeSlot >= processorInRunning->needTime){
-            relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
-            processorInRunning->finishTime=relativeTime;//!!!!!!!!!!!!!
-            processorInRunning->runTime=processorInRunning->needTime;
-            destroy(); *//* 调用destroy函数*//*
-        }
-        else{
-            relativeTime+=timeSlot;
-            processorInRunning->runTime = processorInRunning->runTime+timeSlot;
-            processorInRunning->state = 'w';
-            operateReady(); *//*调用sort函数*//*
-        }
-    }*/
         void running() {
         /*    if(processorInRunning==NULL)operateReady();*/
             int nowIndex=0;
@@ -270,11 +228,12 @@
                     relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
                     processorInRunning->finishTime=relativeTime;//!!!!!!!!!!!!!
                     processorInRunning->runTime=processorInRunning->needTime;
+                        show1PCB(processorInRunning);
                     destroy(); //* 调用destroy函数*//*
                 }
                 //执行完一个时间片
                 else{
-                    relativeTime+=processorInRunning->timeSlot;
+                    relativeTime += processorInRunning->timeSlot;
                     processorInRunning->runTime = processorInRunning->runTime+ processorInRunning->timeSlot;
                     processorInRunning->state = 'w';
                     moveDown(); //*调用sort函数*//*
@@ -284,32 +243,49 @@
             else{
                 //一直插入
                 do{
-                    nowIndex=judgeNULL();
+
+                    //todo
+/*                  nowIndex=judgeNULL();
                     if(nowIndex!=amount4Multi)processorInRunning=extract();
-                    if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}
+                    if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}*/
                     //没被打断就执行完毕
-                    if (processorInRunning->runTime+array4PCB[doneIndex4PCB-1]->arriveTime >= processorInRunning->needTime){
+                    if (processorInRunning->runTime + array4PCB[doneIndex4PCB-1]->arriveTime - relativeTime >= processorInRunning->needTime){
                         relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
                         processorInRunning->finishTime=relativeTime;//!!!!!!!!!!!!!
                         processorInRunning->runTime=processorInRunning->needTime;
+                            show1PCB(processorInRunning);
                         destroy(); //* 调用destroy函数*//*
+/*                                            nowIndex=judgeNULL();
+                                            if(nowIndex!=amount4Multi)processorInRunning=extract();
+                                            if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}*/
                     }
                     //执行完一个被打断
                     else{
+                        //todo 修正插入时的relativeTime
                         if(processorInRunning->belong2Index!=0){
-                            relativeTime+=array4PCB[doneIndex4PCB-1]->arriveTime;
-                            processorInRunning->runTime = processorInRunning->runTime+ array4PCB[doneIndex4PCB-1]->arriveTime ;
+                            processorInRunning->runTime = processorInRunning->runTime+ array4PCB[doneIndex4PCB-1]->arriveTime - relativeTime;
+                            relativeTime += array4PCB[doneIndex4PCB-1]->arriveTime - relativeTime;
+                                show1PCB(processorInRunning);
                             processorInRunning->state = 'w';
+                            // 放回准备队列里
                             PCB*temp;
                             for(temp=multi[processorInRunning->belong2Index];temp->link!=NULL;temp=temp->link);
-                            temp->link=processorInRunning;
-                            //todo 放回准备队列里
+                            temp->link=processorInRunning;///////////////////////////////////////
+                            //temp->link->link=NULL; 
+                            //processorInRunning->link=NULL; 
+/*                                                nowIndex=judgeNULL();
+                                                if(nowIndex!=amount4Multi)processorInRunning=extract();
+                                                if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}*/
                         }
                         else{
                             relativeTime+=processorInRunning->timeSlot;
                             processorInRunning->runTime = processorInRunning->runTime+ processorInRunning->timeSlot;
+                                show1PCB(processorInRunning);
                             processorInRunning->state = 'w';
                             moveDown(); //*调用sort函数*//*
+/*                                                nowIndex=judgeNULL();
+                                                if(nowIndex!=amount4Multi)processorInRunning=extract();
+                                                if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}*/
                         }
                     }
                     showMultiArray();
@@ -332,26 +308,6 @@
         while (doneIndex4PCB<amount4PCBArray || (judgeNULL() != amount4Multi)  ||
             ( (processorInRunning!=NULL) && processorInRunning->runTime<processorInRunning->needTime ) ){
             ch = getchar();
-/*           if(ready!=NULL){
-                processorInRunning = ready;
-                ready = processorInRunning->link;*/
-/*            if(judgeNULL() != amount4Multi){
-                processorInRunning = multi[judgeNULL()]->link;
-                //ready = processorInRunning->link;
-                processorInRunning->link = NULL;
-                processorInRunning->state = 'R';
-                showMultiArray();
-                running();
-            }
-            else{
-                if(processorInRunning!=NULL){
-                    processorInRunning->state = 'R';
-                    showMultiArray();
-                    running();
-                }
-                showMultiArray();
-                operateReady();
-            }*/
             running();
             printf("\n 按任一键继续......");
             ch = getchar();
