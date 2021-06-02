@@ -96,23 +96,23 @@
         /*查到合适的位置进行插入*/
         else{
             /*比第一个还要大，则插入到队头*/
-                if(in ->prio >= fst ->prio)  {
-                    in->next = Head;
-                    Head = in;
-              }
+            if(in ->prio >= fst ->prio)  {
+                in->next = Head;
+                Head = in;
+            }
             else{
-                while(fst->next != NULL)  /*移动指针查找第一个别它小的元素的位置进行插入*/
-                {
+                /*移动指针查找第一个别它小的元素的位置进行插入*/
+                while(fst->next != NULL){
                     nxt = fst;
                     fst = fst->next;
                 }
-               if(fst ->next == NULL)  /*已经搜索到队尾，则其优先级数最小，将其插入到队尾即可*/
-               {
+                /*已经搜索到队尾，则其优先级数最小，将其插入到队尾即可*/
+               if(fst ->next == NULL)  {
                     in ->next = fst ->next;
                     fst ->next = in;
                }
-               else     /*插入到队列中*/
-               {
+               /*插入到队列中*/
+               else{
                     nxt = in;
                     in ->next = fst;
                }
@@ -164,118 +164,105 @@
         }
     }
      /*进程创建函数*/
-    void ProcessCreate()
-    {
-    PCB *tmp;
-    int i;
-
-    printf("输入进程的个数：\n");
-    scanf("%d",&num);
-    printf("输入进程名字和进程所需时间：\n");
-    for(i = 0;i < num; i++)
-    {
-      if((tmp = (PCB *)malloc(sizeof(PCB)))==NULL)
-      {
-       perror("malloc");
-       exit(1);
-      }
-      scanf("%s",tmp->name);
-      getchar();        /*吸收回车符号*/
-      scanf("%d",&(tmp->needtime));
-      tmp ->cputime = 0;
-      tmp ->state ='W';
-      tmp ->prio = 50 - tmp->needtime;  /*设置其优先级，需要的时间越多，优先级越低*/
-      tmp ->round = Head ->round;
-      tmp ->count = 0;
-      InsertLast(tmp,Head);      /*按照优先级从高到低，插入到就绪队列*/
-    }
-    }
-    void RoundRun(ReadyQueue *timechip)    /*时间片轮转调度算法*/
-    {
-
-    int flag = 1;
-
-    GetFirst(timechip);
-    while(run != NULL)
-    {
-      while(flag)
-      {
-       run->count++;
-       run->cputime++;
-       run->needtime--;
-       if(run->needtime == 0) /*进程执行完毕*/
-       {
-        run ->state = 'F';
-        InsertFinish(run);
-        flag = 0;
-       }
-       else if(run->count == timechip ->round)/*时间片用完*/
-       {
-        run->state = 'W';
-        run->count = 0;   /*计数器清零，为下次做准备*/
-        InsertLast(run,timechip);
-        flag = 0;
-       }
-      }
-      flag = 1;
-      GetFirst(timechip);
-    }
-    }
-    void MultiDispatch()   /*多级调度算法，每次执行一个时间片*/
-    {
-    int flag = 1;
-    int k = 0;
-
-    ReadyQueue *point;
-    point = Head;
-
-    GetFirst(point);
-    while(run != NULL)
-    {
-      Output();
-      if(Head ->LinkPCB!=NULL)
-       point = Head;
-      while(flag)
-      {
-       run->count++;
-       run->cputime++;
-       run->needtime--;
-       if(run->needtime == 0) /*进程执行完毕*/
-       {
-        run ->state = 'F';
-        InsertFinish(run);
-        flag = 0;
-       }
-       else if(run->count == run->round)/*时间片用完*/
-       {
-        run->state = 'W';
-        run->count = 0;   /*计数器清零，为下次做准备*/
-        if(point ->next!=NULL)
-        {
-         run ->round = point->next ->round;/*设置其时间片是下一个就绪队列的时间片*/
-         InsertLast(run,point->next);  /*将进程插入到下一个就绪队列中*/
-         flag = 0;
+    void ProcessCreate(){
+        PCB *tmp;
+        int i;
+        printf("输入进程的个数：\n");
+        scanf("%d",&num);
+        printf("输入进程名字和进程所需时间：\n");
+        for(i = 0;i < num; i++){
+            if((tmp = (PCB *)malloc(sizeof(PCB)))==NULL){
+                perror("malloc");
+                exit(1);
+            }
+            scanf("%s",tmp->name);
+            getchar();        /*吸收回车符号*/
+            scanf("%d",&(tmp->needtime));
+            tmp ->cputime = 0;
+            tmp ->state ='W';
+            tmp ->prio = 50 - tmp->needtime;  /*设置其优先级，需要的时间越多，优先级越低*/
+            tmp ->round = Head ->round;
+            tmp ->count = 0;
+            InsertLast(tmp,Head);      /*按照优先级从高到低，插入到就绪队列*/
         }
-        else
-        {
-         RoundRun(point);   /*如果为最后一个就绪队列就调用时间片轮转算法*/
-         break;
-        }
-       }
-       ++k;
-       if(k == 3)
-       {
-        ProcessCreate();
-       }
-      }
-      flag = 1;
-      if(point ->LinkPCB == NULL)/*就绪队列指针下移*/
-       point =point->next;
-      if(point ->next ==NULL)
-      {
-       RoundRun(point);
-       break;
-      }
-      GetFirst(point);
     }
+     /*时间片轮转调度算法*/
+    void RoundRun(ReadyQueue *timechip){
+        int flag = 1;
+        GetFirst(timechip);
+        while(run != NULL){
+            while(flag){
+                run->count++;
+                run->cputime++;
+                run->needtime--;
+                /*进程执行完毕*/
+                if(run->needtime == 0) {
+                    run ->state = 'F';
+                    InsertFinish(run);
+                    flag = 0;
+                }
+                /*时间片用完*/
+                else if(run->count == timechip ->round){
+                    run->state = 'W';
+                    run->count = 0;   /*计数器清零，为下次做准备*/
+                    InsertLast(run,timechip);
+                    flag = 0;
+                }
+        }
+            flag = 1;
+            GetFirst(timechip);
+        }
+    }
+    /*多级调度算法，每次执行一个时间片*/
+    void MultiDispatch()   {
+        int flag = 1;
+        int k = 0;
+        ReadyQueue *point;
+        point = Head;
+        GetFirst(point);
+        while(run != NULL){
+            Output();
+            if(Head ->LinkPCB!=NULL){
+                point = Head;
+            }
+            while(flag){
+                run->count++;
+                run->cputime++;
+                run->needtime--;
+                /*进程执行完毕*/
+                if(run->needtime == 0) {
+                    run ->state = 'F';
+                    InsertFinish(run);
+                    flag = 0;
+                }
+                /*时间片用完*/
+                else if(run->count == run->round){
+                    run->state = 'W';
+                    run->count = 0;   /*计数器清零，为下次做准备*/
+                    if(point ->next!=NULL){
+                        run ->round = point->next ->round;/*设置其时间片是下一个就绪队列的时间片*/
+                        InsertLast(run,point->next);  /*将进程插入到下一个就绪队列中*/
+                        flag = 0;
+                    }
+                    else{
+                        RoundRun(point);   /*如果为最后一个就绪队列就调用时间片轮转算法*/
+                        break;
+                    }
+                }
+                ++k;
+                if(k == 3){
+//                    ProcessCreate();
+                }
+            }
+            flag = 1;
+            /*就绪队列指针下移*/
+            if(point ->LinkPCB == NULL){
+                point =point->next;
+            }
+            if(point ->next ==NULL){
+                RoundRun(point);
+                break;
+            }
+            GetFirst(point);
+        }
     }
