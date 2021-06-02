@@ -52,7 +52,7 @@
                 }
                 int judgeNULL(){
                     int index=0;
-                    for(;multi[index]->link==NULL;index++);
+                    for(;index<amount4Multi&&multi[index]->link==NULL;index++);
                     return index;
                 }
                 PCB* extract(){
@@ -63,6 +63,7 @@
                         multi[index]->link=multi[index]->link->link;
                         //保险起见先将其置为NULL;
                         son->link=NULL;
+                        son->state='R';
                     }
                     return son;
                 }
@@ -78,7 +79,7 @@
                     array4PCB[doneIndex4PCB]->timeSlot=multi[0]->timeSlot;
                     relativeTime=array4PCB[doneIndex4PCB]->arriveTime;
                     doneIndex4PCB++;
-                    return 0;
+                    return 1;
                 }
 /*                nowIndex=judgeNULL();//is 0!!!!!
                 PCB  *rear=multi[nowIndex]->link;
@@ -95,16 +96,29 @@
                 PCB  *rear=multi[0]->link;
                 for(;rear!=NULL&&rear->link!=NULL;rear=rear->link);
                 //中断一次而已!!
-                if(doneIndex4PCB<amount4PCBArray&&
-                array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot){
-                            rear->link=array4PCB[doneIndex4PCB];
-                            rear=rear->link;
-                            array4PCB[doneIndex4PCB]->belong2Index=0;
-                            array4PCB[doneIndex4PCB]->timeSlot=multi[0]->timeSlot;
-                            doneIndex4PCB++;
-                            return 1;
+                if(nowIndex!=0){
+                    if(doneIndex4PCB<amount4PCBArray&&
+                    array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot){
+                                rear->link=array4PCB[doneIndex4PCB];
+                                rear=rear->link;
+                                array4PCB[doneIndex4PCB]->belong2Index=0;
+                                array4PCB[doneIndex4PCB]->timeSlot=multi[0]->timeSlot;
+                                doneIndex4PCB++;
+                                return 1;
+                    }
                 }
-                    //rear->link=processorInRunning;
+                else{
+                    //一个时间片发生中间的都插入
+                    for(;doneIndex4PCB<amount4PCBArray&&
+                    array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot;doneIndex4PCB++){
+                                rear->link=array4PCB[doneIndex4PCB];
+                                rear=rear->link;
+                                array4PCB[doneIndex4PCB]->belong2Index=0;
+                                array4PCB[doneIndex4PCB]->timeSlot=multi[0]->timeSlot;
+
+                                return 1;
+                    }
+                }
             }
             return 0;
         }
@@ -191,9 +205,11 @@
     /* 建立进程查看函数 */
     showMultiArray() {
         //PCB* pr;
-        printf("\n **** 当前正在运行的进程是:%s", processorInRunning->name); /*显示当前运行进程*/
-        show1PCB(processorInRunning);
-        printf("\n relativeTime is the time at starting this slice!");
+        if(processorInRunning!=NULL){
+            printf("\n **** 当前正在运行的进程是:%s", processorInRunning->name); /*显示当前运行进程*/
+            show1PCB(processorInRunning);
+            printf("\n relativeTime is the time at starting this slice!");
+        }
         //pr = ready;
         for(int i=0;i<amount4Multi;i++){
             printf("\n ****当前就绪队列%d状态为:\n",i); /*显示就绪队列状态*/
@@ -231,12 +247,12 @@
     }*/
         void running() {
         /*    if(processorInRunning==NULL)operateReady();*/
-            //int nowIndex=0;
+            int nowIndex=0;
             if(0==operateReady()){
                //operateReady();
-                //nowIndex=judgeNULL();
-                processorInRunning=extract();
-                if(processorInRunning==NULL)return;
+                nowIndex=judgeNULL();
+                if(nowIndex!=amount4Multi)processorInRunning=extract();
+                if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}
                 //没用完一个时间片就执行完毕
                 if (processorInRunning->runTime+processorInRunning->timeSlot >= processorInRunning->needTime){
                     relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
@@ -255,10 +271,10 @@
             else{
                 //一直插入
                 do{
-                    //nowIndex=judgeNULL();
-                    processorInRunning=extract();
-                    if(processorInRunning==NULL)return;
-                    //没用完一个时间片就执行完毕
+                    nowIndex=judgeNULL();
+                    if(nowIndex!=amount4Multi)processorInRunning=extract();
+                    if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}
+                    //没被打断就执行完毕
                     if (processorInRunning->runTime+array4PCB[doneIndex4PCB-1]->arriveTime >= processorInRunning->needTime){
                         relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
                         processorInRunning->finishTime=relativeTime;//!!!!!!!!!!!!!
@@ -295,6 +311,7 @@
                 scanf("%d", &amount4Multi);
                 multi=(PCB**)malloc(amount4Multi*sizeof(PCB*));
                 for(int i=0;i<amount4Multi;i++){
+                    multi[i]=(PCB*)malloc(sizeof(PCB));
                     printf("请输入%d级队列的timeSlot  ",i);
                     scanf("%d", &multi[i]->timeSlot);
                     multi[i]->belong2Index=i;
@@ -308,7 +325,7 @@
 /*           if(ready!=NULL){
                 processorInRunning = ready;
                 ready = processorInRunning->link;*/
-            if(judgeNULL() != amount4Multi){
+/*            if(judgeNULL() != amount4Multi){
                 processorInRunning = multi[judgeNULL()]->link;
                 //ready = processorInRunning->link;
                 processorInRunning->link = NULL;
@@ -324,7 +341,9 @@
                 }
                 showMultiArray();
                 operateReady();
-            }
+            }*/
+            running();
+            showMultiArray();
             printf("\n 按任一键继续......");
             ch = getchar();
         }
