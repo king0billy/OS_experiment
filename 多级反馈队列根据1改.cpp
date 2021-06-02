@@ -79,21 +79,23 @@
                     array4PCB[doneIndex4PCB]->timeSlot=multi[0]->timeSlot;
                     relativeTime=array4PCB[doneIndex4PCB]->arriveTime;
                     doneIndex4PCB++;
-                    return 1;
+                    //return 1;
                 }
-/*                nowIndex=judgeNULL();//is 0!!!!!
-                PCB  *rear=multi[nowIndex]->link;
-                    for(;rear!=NULL&&rear->link!=NULL;rear=rear->link);
-                    //一个时间片发生中间的都插入
-                    for(;rear!=NULL&&doneIndex4PCB<amount4PCBArray&&
-                       array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot;
-                       doneIndex4PCB++){
-                        rear->link=array4PCB[doneIndex4PCB];
-                        rear=rear->link;
-                    }*/
+                nowIndex=judgeNULL();//is 0!!!!!
+                    //在第一队一个时间片发生中间的都插入
+                PCB  *rear=multi[0];
+                for(;rear!=NULL&&rear->link!=NULL;rear=rear->link);
+                for(;doneIndex4PCB<amount4PCBArray&&
+                array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot;doneIndex4PCB++){
+                    rear->link=array4PCB[doneIndex4PCB];
+                    rear=rear->link;
+                    array4PCB[doneIndex4PCB]->belong2Index=0;
+                    array4PCB[doneIndex4PCB]->timeSlot=multi[0]->timeSlot;
+                }
+                return 0;
             }
             else{
-                PCB  *rear=multi[0]->link;
+                PCB  *rear=multi[0];
                 for(;rear!=NULL&&rear->link!=NULL;rear=rear->link);
                 //中断一次而已!!
                 if(nowIndex!=0){
@@ -108,16 +110,15 @@
                     }
                 }
                 else{
-                    //一个时间片发生中间的都插入
+                    //在第一队一个时间片发生中间的都插入
                     for(;doneIndex4PCB<amount4PCBArray&&
                     array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot;doneIndex4PCB++){
                                 rear->link=array4PCB[doneIndex4PCB];
                                 rear=rear->link;
                                 array4PCB[doneIndex4PCB]->belong2Index=0;
                                 array4PCB[doneIndex4PCB]->timeSlot=multi[0]->timeSlot;
-
-                                return 1;
                     }
+                    return 1;
                 }
             }
             return 0;
@@ -151,6 +152,17 @@
     }*/
     /* 建立进程控制块函数*/
     input() {
+            printf("请输入amount4Multi?  ");
+            scanf("%d", &amount4Multi);
+            multi=(PCB**)malloc(amount4Multi*sizeof(PCB*));
+            for(int i=0;i<amount4Multi;i++){
+                multi[i]=(PCB*)malloc(sizeof(PCB));
+                printf("请输入%d级队列的timeSlot  ",i);
+                scanf("%d", &multi[i]->timeSlot);
+                multi[i]->belong2Index=i;
+                multi[i]->link=0;
+            }
+            printf("前%d均为 FCFS ,第%d为 RR\n",amount4Multi-1,amount4Multi);
         printf("请输入进程total number? ");
         scanf("%d", &amount4PCBArray);
         printf("\n");
@@ -188,7 +200,7 @@
             printf("i=%d,arriveTime=%d\n",i,array4PCB[i]->arriveTime);
         }
         processorInRunning=NULL;
-        operateReady(); /* 调用sort函数*/
+        //operateReady(); /* 调用sort函数*/
     }
     /*建立进程显示函数,用于显示当前进程*/
     show1PCB(PCB * pr) {
@@ -212,7 +224,7 @@
         }
         //pr = ready;
         for(int i=0;i<amount4Multi;i++){
-            printf("\n ****当前就绪队列%d状态为:\n",i); /*显示就绪队列状态*/
+            printf("\n ****当前就绪队列%d状态为:",i); /*显示就绪队列状态*/
             for (PCB* pr=multi[i]->link;pr != NULL;pr = pr->link){
                 show1PCB(pr);
             }
@@ -267,6 +279,7 @@
                     processorInRunning->state = 'w';
                     moveDown(); //*调用sort函数*//*
                 }
+                showMultiArray();
             }
             else{
                 //一直插入
@@ -287,6 +300,10 @@
                             relativeTime+=array4PCB[doneIndex4PCB-1]->arriveTime;
                             processorInRunning->runTime = processorInRunning->runTime+ array4PCB[doneIndex4PCB-1]->arriveTime ;
                             processorInRunning->state = 'w';
+                            PCB*temp;
+                            for(temp=multi[processorInRunning->belong2Index];temp->link!=NULL;temp=temp->link);
+                            temp->link=processorInRunning;
+                            //todo 放回准备队列里
                         }
                         else{
                             relativeTime+=processorInRunning->timeSlot;
@@ -295,8 +312,11 @@
                             moveDown(); //*调用sort函数*//*
                         }
                     }
+                    showMultiArray();
                 }while(1==operateReady());
             }
+            //showMultiArray();
+            return;
 /*            if(judgeNULL()==amount4Multi){}
             }*/
         }
@@ -307,17 +327,7 @@
             printf("请输入time slice?  ");
             scanf("%d", &timeSlot);*/
         relativeTime=0;
-                printf("请输入amount4Multi?  ");
-                scanf("%d", &amount4Multi);
-                multi=(PCB**)malloc(amount4Multi*sizeof(PCB*));
-                for(int i=0;i<amount4Multi;i++){
-                    multi[i]=(PCB*)malloc(sizeof(PCB));
-                    printf("请输入%d级队列的timeSlot  ",i);
-                    scanf("%d", &multi[i]->timeSlot);
-                    multi[i]->belong2Index=i;
-                    multi[i]->link=0;
-                }
-                printf("前%d均为 FCFS ,第%d为 RR\n",amount4Multi-1,amount4Multi);
+
         input();
         while (doneIndex4PCB<amount4PCBArray || (judgeNULL() != amount4Multi)  ||
             ( (processorInRunning!=NULL) && processorInRunning->runTime<processorInRunning->needTime ) ){
@@ -343,7 +353,6 @@
                 operateReady();
             }*/
             running();
-            showMultiArray();
             printf("\n 按任一键继续......");
             ch = getchar();
         }
