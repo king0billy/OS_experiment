@@ -24,7 +24,7 @@
 
     double* array4Time;
     int doneIndex4Time=0;
-    int FirstInsertIndex=0;
+    int FirstInsertIndex=-1;
 
     PCB** multi;
     int amount4Multi=0;
@@ -83,7 +83,8 @@
                     doneIndex4PCB++;
                     //return 1;
                 }
-                nowIndex=judgeNULL();//is 0!!!!!
+                nowIndex=0;
+                //nowIndex=judgeNULL();//todo is 0????
                     //在第一队一个时间片发生中间的都插入
                 PCB  *rear=multi[0];
                 for(;rear!=NULL&&rear->link!=NULL;rear=rear->link);
@@ -100,6 +101,8 @@
                     array4PCB[doneIndex4PCB]->belong2Index=0;
                     array4PCB[doneIndex4PCB]->timeSlot=multi[0]->timeSlot;
                 }
+                //todo why this is important
+                rear->link=NULL; 
                 return 0;
             }
             else{
@@ -137,6 +140,36 @@
             }
             return 0;
         }
+    /*建立进程显示函数,用于显示当前进程*/
+    show1PCB(PCB * pr) {
+        printf("\n qname\t state\t ndtime\t runTime\t arriveTime\t finishTime\t relativeTime\t timeSlot\n");
+        printf("|%s\t", pr->name);
+        printf("|%c\t", pr->state);
+        printf("|%d\t", pr->needTime);
+        printf("|%d\t", pr->runTime);
+        printf("\t|%d\t", pr->arriveTime);
+        printf("\t|%d\t", pr->finishTime);
+        printf("\t|%d\t", relativeTime);
+        printf("\t|%d\t", pr->timeSlot);
+    }
+    /* 建立进程查看函数 */
+    showMultiArray() {
+        //PCB* pr;
+        if(processorInRunning!=NULL){
+            printf("\n **** 当前正在运行的进程是:%s", processorInRunning->name); /*显示当前运行进程*/
+            show1PCB(processorInRunning);
+            printf("\n relativeTime is the time at starting this slice!");
+        }
+        //pr = ready;
+        for(int i=0;i<amount4Multi;i++){
+            printf("\n ****当前就绪队列%d状态为:",i); /*显示就绪队列状态*/
+            for (PCB* pr=multi[i]->link;pr != NULL;pr = pr->link){
+                show1PCB(pr);
+            }
+        }
+        printf("\n relativeTime is the time at starting this slice!\n");
+    }
+
     /* 建立进程控制块函数*/
     input() {
             printf("请输入amount4Multi?  ");
@@ -186,40 +219,11 @@
             }
         for(int i=0;i<amount4PCBArray;i++){
             printf("i=%d,arriveTime=%d\n",i,array4PCB[i]->arriveTime);
+             //show1PCB(array4PCB[i]);
         }
         processorInRunning=NULL;
         //operateReady(); /* 调用sort函数*/
     }
-    /*建立进程显示函数,用于显示当前进程*/
-    show1PCB(PCB * pr) {
-        printf("\n qname\t state\t ndtime\t runTime\t arriveTime\t finishTime\t relativeTime\t timeSlot\n");
-        printf("|%s\t", pr->name);
-        printf("|%c\t", pr->state);
-        printf("|%d\t", pr->needTime);
-        printf("|%d\t", pr->runTime);
-        printf("\t|%d\t", pr->arriveTime);
-        printf("\t|%d\t", pr->finishTime);
-        printf("\t|%d\t", relativeTime);
-        printf("\t|%d\t", pr->timeSlot);
-    }
-    /* 建立进程查看函数 */
-    showMultiArray() {
-        //PCB* pr;
-        if(processorInRunning!=NULL){
-            printf("\n **** 当前正在运行的进程是:%s", processorInRunning->name); /*显示当前运行进程*/
-            show1PCB(processorInRunning);
-            printf("\n relativeTime is the time at starting this slice!");
-        }
-        //pr = ready;
-        for(int i=0;i<amount4Multi;i++){
-            printf("\n ****当前就绪队列%d状态为:",i); /*显示就绪队列状态*/
-            for (PCB* pr=multi[i]->link;pr != NULL;pr = pr->link){
-                show1PCB(pr);
-            }
-        }
-        printf("\n relativeTime is the time at starting this slice!\n");
-    }
-
     /*建立进程撤消函数(进程运行结束,撤消进程)*/
     destroy() {
         printf("\n 进程 [%s] 已完成.", processorInRunning->name);
@@ -233,12 +237,14 @@
         void running() {
         /*    if(processorInRunning==NULL)operateReady();*/
             int nowIndex=0;
+            if(doneIndex4PCB==0)operateReady();
+            nowIndex=judgeNULL();
+            //todo nowIndex==amount4Multi
+            if(nowIndex!=amount4Multi)processorInRunning=extract();
+            if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}
             if(0==operateReady()){
                //operateReady();
-                nowIndex=judgeNULL();
-                //todo nowIndex==amount4Multi
-                if(nowIndex!=amount4Multi)processorInRunning=extract();
-                if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}
+
                 //没用完一个时间片就执行完毕
                 if (processorInRunning->runTime + processorInRunning->timeSlot >= processorInRunning->needTime){
                     relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
