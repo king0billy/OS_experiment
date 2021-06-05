@@ -24,6 +24,7 @@
 
     double* array4Time;
     int doneIndex4Time=0;
+    int FirstInsertIndex=0;
 
     PCB** multi;
     int amount4Multi=0;
@@ -31,6 +32,7 @@
                     PCB* son,*rear;
                     int index=processorInRunning->belong2Index;
                 	son=processorInRunning;
+                    //printf("processorInRunning->belong2Index=%d ,processorInRunning->name=%s \n",index,processorInRunning->name);
 
                     if(index<amount4Multi-1){
                         
@@ -85,6 +87,12 @@
                     //在第一队一个时间片发生中间的都插入
                 PCB  *rear=multi[0];
                 for(;rear!=NULL&&rear->link!=NULL;rear=rear->link);
+
+                        if(doneIndex4PCB<amount4PCBArray&&
+                        array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot){
+                            FirstInsertIndex=doneIndex4PCB;
+                        }
+
                 for(;doneIndex4PCB<amount4PCBArray&&
                 array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot;doneIndex4PCB++){
                     rear->link=array4PCB[doneIndex4PCB];
@@ -101,16 +109,21 @@
                 if(nowIndex!=0){
                     if(doneIndex4PCB<amount4PCBArray&&
                     array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot){
+                                            FirstInsertIndex=doneIndex4PCB;
                                 rear->link=array4PCB[doneIndex4PCB];
                                 rear=rear->link;
                                 array4PCB[doneIndex4PCB]->belong2Index=0;
                                 array4PCB[doneIndex4PCB]->timeSlot=multi[0]->timeSlot;
                                 doneIndex4PCB++;
-                                return 1;
+                                if(doneIndex4PCB>FirstInsertIndex)return 1;
                     }
                 }
                 else{
                     //在第一队一个时间片发生中间的都插入
+                                            if(doneIndex4PCB<amount4PCBArray&&
+                                            array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot){
+                                                FirstInsertIndex=doneIndex4PCB;
+                                            }
                     for(;doneIndex4PCB<amount4PCBArray&&
                     array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot;doneIndex4PCB++){
                                 rear->link=array4PCB[doneIndex4PCB];
@@ -118,7 +131,8 @@
                                 array4PCB[doneIndex4PCB]->belong2Index=0;
                                 array4PCB[doneIndex4PCB]->timeSlot=multi[0]->timeSlot;
                     }
-                    return 1;
+                    //todo
+                    if(doneIndex4PCB>FirstInsertIndex)return 1;
                 }
             }
             return 0;
@@ -153,6 +167,7 @@
             printf("\n");
             processorInRunning->runTime = 0; processorInRunning->state = 'w';
             processorInRunning->link = NULL;
+            processorInRunning->belong2Index=0;
             array4PCB[i]=processorInRunning;
             array4Time[i]=0;
         }
@@ -185,7 +200,7 @@
         printf("\t|%d\t", pr->arriveTime);
         printf("\t|%d\t", pr->finishTime);
         printf("\t|%d\t", relativeTime);
-        printf("\t|%d\t", timeSlot);
+        printf("\t|%d\t", pr->timeSlot);
     }
     /* 建立进程查看函数 */
     showMultiArray() {
@@ -221,10 +236,11 @@
             if(0==operateReady()){
                //operateReady();
                 nowIndex=judgeNULL();
+                //todo nowIndex==amount4Multi
                 if(nowIndex!=amount4Multi)processorInRunning=extract();
                 if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}
                 //没用完一个时间片就执行完毕
-                if (processorInRunning->runTime+processorInRunning->timeSlot >= processorInRunning->needTime){
+                if (processorInRunning->runTime + processorInRunning->timeSlot >= processorInRunning->needTime){
                     relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
                     processorInRunning->finishTime=relativeTime;//!!!!!!!!!!!!!
                     processorInRunning->runTime=processorInRunning->needTime;
@@ -242,40 +258,36 @@
             }
             else{
                 //一直插入
-                do{
-
-                    //todo
-/*                  nowIndex=judgeNULL();
+//                do{
+                    //todo doneIndex4PCB-1出错!正在执行的0级for的不只是插入了一个啊
+/*                    nowIndex=judgeNULL();
                     if(nowIndex!=amount4Multi)processorInRunning=extract();
                     if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}*/
                     //没被打断就执行完毕
-                    if (processorInRunning->runTime + array4PCB[doneIndex4PCB-1]->arriveTime - relativeTime >= processorInRunning->needTime){
+                    if (processorInRunning->runTime + array4PCB[FirstInsertIndex]->arriveTime - relativeTime >= processorInRunning->needTime){
+                                                        FirstInsertIndex++;
                         relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
                         processorInRunning->finishTime=relativeTime;//!!!!!!!!!!!!!
                         processorInRunning->runTime=processorInRunning->needTime;
-                            show1PCB(processorInRunning);
+                                show1PCB(processorInRunning);
                         destroy(); //* 调用destroy函数*//*
-/*                                            nowIndex=judgeNULL();
-                                            if(nowIndex!=amount4Multi)processorInRunning=extract();
-                                            if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}*/
                     }
-                    //执行完一个被打断
+                    //执行一个时间片中途被打断
+                    //如果处理机正在第i队列中为某进程服务时又有新进程进入任一优先级较高的队列，此时须立即把正在运行的进程放回到第i队列的末尾，
                     else{
                         //todo 修正插入时的relativeTime
                         if(processorInRunning->belong2Index!=0){
-                            processorInRunning->runTime = processorInRunning->runTime+ array4PCB[doneIndex4PCB-1]->arriveTime - relativeTime;
-                            relativeTime += array4PCB[doneIndex4PCB-1]->arriveTime - relativeTime;
+                            processorInRunning->runTime = processorInRunning->runTime+ array4PCB[FirstInsertIndex]->arriveTime - relativeTime;
+                            relativeTime += array4PCB[FirstInsertIndex]->arriveTime - relativeTime;
+                                                        FirstInsertIndex++;
                                 show1PCB(processorInRunning);
                             processorInRunning->state = 'w';
                             // 放回准备队列里
                             PCB*temp;
                             for(temp=multi[processorInRunning->belong2Index];temp->link!=NULL;temp=temp->link);
+                            processorInRunning->link=NULL;//why
                             temp->link=processorInRunning;///////////////////////////////////////
-                            //temp->link->link=NULL; 
-                            //processorInRunning->link=NULL; 
-/*                                                nowIndex=judgeNULL();
-                                                if(nowIndex!=amount4Multi)processorInRunning=extract();
-                                                if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}*/
+                            temp->link->link=NULL;//todo why
                         }
                         else{
                             relativeTime+=processorInRunning->timeSlot;
@@ -283,13 +295,18 @@
                                 show1PCB(processorInRunning);
                             processorInRunning->state = 'w';
                             moveDown(); //*调用sort函数*//*
-/*                                                nowIndex=judgeNULL();
-                                                if(nowIndex!=amount4Multi)processorInRunning=extract();
-                                                if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}*/
                         }
                     }
                     showMultiArray();
-                }while(1==operateReady());
+
+/*                    nowIndex=judgeNULL();
+                    printf("1==operateReady,nowIndex=%d\n",nowIndex);
+                    if(nowIndex!=amount4Multi)processorInRunning=extract();
+                    show1PCB(processorInRunning);
+                    if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}*/
+/*                    showMultiArray();*/
+
+//                }while(1==operateReady());
             }
             //showMultiArray();
             return;
