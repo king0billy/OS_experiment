@@ -225,10 +225,12 @@
                 }
             }*/
         pcb* tempP=array4PCB[0];
-        for(int i=0;i<amount4Multi;i++){
-            for(int j=0;j<amount4Multi-i-1;j++){
+        int j;
+        for(int i=0;i<amount4PCBArray-1;i++){
+            for( j=0;j<amount4PCBArray-i-1;j++){
                 if(array4PCB[j]->arriveTime > array4PCB[j+1]->arriveTime){
                     tempP=array4PCB[j];array4PCB[j]=array4PCB[j+1];array4PCB[j+1]=tempP;
+                    //printf("i=%d,j=%d\n",i,j);
                 }
             }
         }
