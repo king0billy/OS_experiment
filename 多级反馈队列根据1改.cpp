@@ -71,7 +71,7 @@
                 }
                 //判断中断的operate
         int operateReady(){
-            int nowIndex=0;
+            int nowIndex=amount4Multi;
             if(processorInRunning!=NULL)nowIndex=processorInRunning->belong2Index;
             //全为空
             if(nowIndex==amount4Multi){
@@ -145,9 +145,10 @@
     /*建立进程显示函数,用于显示当前进程*/
     void show1PCB(PCB * pr) {
         if(pr==NULL)return;
-        printf("\n qname\t state\t ndtime\t runTime\t arriveTime\t finishTime\t relativeTime\t timeSlot\n");
+        //printf("\n qname\t state\t ndtime\t runTime\t arriveTime\t finishTime\t relativeTime\t timeSlot\n");
+        printf("\n qname\t ndtime\t runTime\t arriveTime\t finishTime\t relativeTime\t timeSlot\n");
         printf("|%s\t", pr->name);
-        printf("|%c\t", pr->state);
+        //printf("|%c\t", pr->state);
         printf("|%d\t", pr->needTime);
         printf("|%d\t", pr->runTime);
         printf("\t|%d\t", pr->arriveTime);
@@ -161,16 +162,16 @@
         if(processorInRunning!=NULL){
             printf("\n **** 当前正在运行的进程是:%s", processorInRunning->name); //显示当前运行进程
             show1PCB(processorInRunning);
-            printf("\n relativeTime is the time at starting this slice!");
+            //printf("\n relativeTime is the time at ending this piece!");
         }
         //pr = ready;
         for(int i=0;i<amount4Multi;i++){
-            printf("\n ***上述run完或被打断后的就绪队列%d状态为:",i); /*显示就绪队列状态*/
+            printf("\n ****上述进程运行完一个时间片或被打断后的就绪队列%d状态为:",i); /*显示就绪队列状态*/
             for (PCB* pr=multi[i]->link;pr != NULL;pr = pr->link){
                 show1PCB(pr);
             }
         }
-        printf("\n relativeTime is the time at starting this slice!\n");
+        printf("\n relativeTime is the time at ending this piece!\n");
     }
 
     /* 建立进程控制块函数*/
@@ -186,7 +187,7 @@
                 multi[i]->link=0;
             }
             printf("前%d均为 FCFS ,第%d为 RR\n",amount4Multi-1,amount4Multi);
-        printf("请输入进程total number? ");
+        printf("请输入进程total number of process? ");
         scanf("%d", &amount4PCBArray);
         printf("\n");
         array4Time=(double*)malloc(amount4PCBArray*sizeof(double));
@@ -209,10 +210,10 @@
             array4PCB[i]=processorInRunning;
             array4Time[i]=0;
         }
-        for(int i=0;i<amount4PCBArray;i++){
+/*        for(int i=0;i<amount4PCBArray;i++){
             show1PCB(array4PCB[i]);
         }
-        printf("\n\n"); 
+        printf("\n\n"); */
         // 选择排序
 /*        pcb* minP=array4PCB[0];pcb* tempP=array4PCB[0];
         for(int i=0,minI=i;i<amount4PCBArray;i++){
@@ -236,10 +237,10 @@
                 }
             }
         }
-        for(int i=0;i<amount4PCBArray;i++){
+/*        for(int i=0;i<amount4PCBArray;i++){
             show1PCB(array4PCB[i]);
         }
-        printf("\n\n"); 
+        printf("\n\n"); */
         processorInRunning=NULL;
         //operateReady(); /* 调用sort函数*/
     }
@@ -264,7 +265,6 @@
             if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}
             if(0==operateReady()){
                //operateReady();
-
                 //没用完一个时间片就执行完毕
                 if (processorInRunning->runTime + processorInRunning->timeSlot >= processorInRunning->needTime){
                     relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
@@ -299,8 +299,7 @@
                     //执行一个时间片中途被打断
                     //如果处理机正在第i队列中为某进程服务时又有新进程进入任一优先级较高的队列，此时须立即把正在运行的进程放回到第i队列的末尾，
                     else{
-                        //todo 修正插入时的relativeTime
-                        printf("index=%d\n\n",processorInRunning->belong2Index);
+                        //printf("processorInRunning->belong2Index=%d\n\n",processorInRunning->belong2Index);
                         if(processorInRunning->belong2Index!=0){
                             processorInRunning->runTime = processorInRunning->runTime+ array4PCB[FirstInsertIndex]->arriveTime - relativeTime;
                             relativeTime += array4PCB[FirstInsertIndex]->arriveTime - relativeTime;
@@ -314,10 +313,19 @@
                             temp->link->link=NULL;//todo why
                         }
                         else{
-                            relativeTime+=processorInRunning->timeSlot;
-                            processorInRunning->runTime = processorInRunning->runTime+ processorInRunning->timeSlot;
-                            processorInRunning->state = 'w';
-                            moveDown(); //*调用sort函数*//*
+                            //todo 乱打的补丁if针对 2 2,3 3 0,7 6,2 7,1
+                            if (processorInRunning->runTime + processorInRunning->timeSlot >= processorInRunning->needTime){
+                                relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
+                                processorInRunning->finishTime=relativeTime;//!!!!!!!!!!!!!
+                                processorInRunning->runTime=processorInRunning->needTime;
+                                destroy(); //* 调用destroy函数*//*
+                            }
+                            else{
+                                relativeTime += processorInRunning->timeSlot;
+                                processorInRunning->runTime = processorInRunning->runTime+ processorInRunning->timeSlot;
+                                processorInRunning->state = 'w';
+                                moveDown(); //*调用sort函数*//*
+                            }
                         }
                     }
                     showMultiArray();
@@ -347,7 +355,7 @@
         input();
         while (doneIndex4PCB<amount4PCBArray || (judgeNULL() != amount4Multi)  ||
             ( (processorInRunning!=NULL) && processorInRunning->runTime<processorInRunning->needTime ) ){
-            ch = getchar();
+            //ch = getchar();
             running();
             printf("\n 按任一键继续......");
             ch = getchar();
