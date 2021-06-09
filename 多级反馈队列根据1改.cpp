@@ -141,7 +141,8 @@
             return 0;
         }
     /*建立进程显示函数,用于显示当前进程*/
-    show1PCB(PCB * pr) {
+    void show1PCB(PCB * pr) {
+        if(pr==NULL)return;
         printf("\n qname\t state\t ndtime\t runTime\t arriveTime\t finishTime\t relativeTime\t timeSlot\n");
         printf("|%s\t", pr->name);
         printf("|%c\t", pr->state);
@@ -156,13 +157,13 @@
     showMultiArray() {
         //PCB* pr;
         if(processorInRunning!=NULL){
-            printf("\n **** 当前正在运行的进程是:%s", processorInRunning->name); /*显示当前运行进程*/
+            printf("\n **** 当前正在运行的进程是:%s", processorInRunning->name); //显示当前运行进程
             show1PCB(processorInRunning);
             printf("\n relativeTime is the time at starting this slice!");
         }
         //pr = ready;
         for(int i=0;i<amount4Multi;i++){
-            printf("\n ****当前就绪队列%d状态为:",i); /*显示就绪队列状态*/
+            printf("\n ***上述run完或被打断后的就绪队列%d状态为:",i); /*显示就绪队列状态*/
             for (PCB* pr=multi[i]->link;pr != NULL;pr = pr->link){
                 show1PCB(pr);
             }
@@ -207,7 +208,6 @@
             array4Time[i]=0;
         }
         for(int i=0;i<amount4PCBArray;i++){
-            //printf("i=%d,arriveTime=%d\n",i,array4PCB[i]->arriveTime);
             show1PCB(array4PCB[i]);
         }
         printf("\n\n"); 
@@ -235,7 +235,6 @@
             }
         }
         for(int i=0;i<amount4PCBArray;i++){
-            //printf("i=%d,arriveTime=%d\n",i,array4PCB[i]->arriveTime);
             show1PCB(array4PCB[i]);
         }
         printf("\n\n"); 
@@ -245,7 +244,7 @@
     /*建立进程撤消函数(进程运行结束,撤消进程)*/
     destroy() {
         printf("\n 进程 [%s] 已完成.", processorInRunning->name);
-        //show1PCB(processorInRunning);
+        show1PCB(processorInRunning);
         array4Time[doneIndex4Time++]=(processorInRunning->finishTime - processorInRunning->arriveTime)*1.0/processorInRunning->needTime;
         printf("\n 进程 [%s] 的带权周转时间为=%lf", processorInRunning->name,array4Time[doneIndex4Time-1]);
         free(processorInRunning);
@@ -268,7 +267,6 @@
                     relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
                     processorInRunning->finishTime=relativeTime;//!!!!!!!!!!!!!
                     processorInRunning->runTime=processorInRunning->needTime;
-                        show1PCB(processorInRunning);
                     destroy(); //* 调用destroy函数*//*
                 }
                 //执行完一个时间片
@@ -293,7 +291,6 @@
                         relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
                         processorInRunning->finishTime=relativeTime;//!!!!!!!!!!!!!
                         processorInRunning->runTime=processorInRunning->needTime;
-                                show1PCB(processorInRunning);
                         destroy(); //* 调用destroy函数*//*
                     }
                     //执行一个时间片中途被打断
@@ -304,7 +301,6 @@
                             processorInRunning->runTime = processorInRunning->runTime+ array4PCB[FirstInsertIndex]->arriveTime - relativeTime;
                             relativeTime += array4PCB[FirstInsertIndex]->arriveTime - relativeTime;
                                                         FirstInsertIndex++;
-                                show1PCB(processorInRunning);
                             processorInRunning->state = 'w';
                             // 放回准备队列里
                             PCB*temp;
@@ -316,7 +312,6 @@
                         else{
                             relativeTime+=processorInRunning->timeSlot;
                             processorInRunning->runTime = processorInRunning->runTime+ processorInRunning->timeSlot;
-                                show1PCB(processorInRunning);
                             processorInRunning->state = 'w';
                             moveDown(); //*调用sort函数*//*
                         }
