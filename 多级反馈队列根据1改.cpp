@@ -71,7 +71,8 @@
                 }
                 //判断中断的operate
         int operateReady(){
-            int nowIndex=judgeNULL();
+            int nowIndex=0;
+            if(processorInRunning!=NULL)nowIndex=processorInRunning->belong2Index;
             //全为空
             if(nowIndex==amount4Multi){
                 //现在被单线程占据的话就先执行单线程吧,时间还没到
@@ -81,6 +82,7 @@
                     array4PCB[doneIndex4PCB]->timeSlot=multi[0]->timeSlot;
                     relativeTime=array4PCB[doneIndex4PCB]->arriveTime;
                     doneIndex4PCB++;
+                    FirstInsertIndex=doneIndex4PCB;
                     //return 1;
                 }
                 nowIndex=0;
@@ -254,6 +256,7 @@
         void running() {
         /*    if(processorInRunning==NULL)operateReady();*/
             int nowIndex=0;
+            //初始化
             if(doneIndex4PCB==0)operateReady();
             nowIndex=judgeNULL();
             //todo nowIndex==amount4Multi
@@ -297,6 +300,7 @@
                     //如果处理机正在第i队列中为某进程服务时又有新进程进入任一优先级较高的队列，此时须立即把正在运行的进程放回到第i队列的末尾，
                     else{
                         //todo 修正插入时的relativeTime
+                        printf("index=%d\n\n",processorInRunning->belong2Index);
                         if(processorInRunning->belong2Index!=0){
                             processorInRunning->runTime = processorInRunning->runTime+ array4PCB[FirstInsertIndex]->arriveTime - relativeTime;
                             relativeTime += array4PCB[FirstInsertIndex]->arriveTime - relativeTime;
