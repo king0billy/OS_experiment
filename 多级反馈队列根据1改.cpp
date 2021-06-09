@@ -186,11 +186,13 @@
         printf("请输入进程total number? ");
         scanf("%d", &amount4PCBArray);
         printf("\n");
-        array4Time=(double*)malloc(amount4PCBArray*sizeof(int));
-        array4PCB=(pcb**)malloc(amount4PCBArray*sizeof(processorInRunning));
+        array4Time=(double*)malloc(amount4PCBArray*sizeof(double));
+        //array4PCB=(pcb**)malloc(amount4PCBArray*sizeof(processorInRunning));
+        array4PCB=(pcb**)malloc(amount4PCBArray*sizeof(pcb*));
         for (int i = 0; i<amount4PCBArray; i++){
             printf("进程号No.%d:", i);
-            processorInRunning = (PCB*)malloc(sizeof(PCB));
+            //processorInRunning = (PCB*)malloc(sizeof(PCB));
+            processorInRunning=getType(PCB);
             processorInRunning->name[0]=(char)(i+'0');
             processorInRunning->name[1]='\0';
             printf("输入arriveTime:");
@@ -204,8 +206,13 @@
             array4PCB[i]=processorInRunning;
             array4Time[i]=0;
         }
+        for(int i=0;i<amount4PCBArray;i++){
+            //printf("i=%d,arriveTime=%d\n",i,array4PCB[i]->arriveTime);
+            show1PCB(array4PCB[i]);
+        }
+        printf("\n\n"); 
         // 选择排序
-        pcb* minP=array4PCB[0];pcb* tempP=array4PCB[0];
+/*        pcb* minP=array4PCB[0];pcb* tempP=array4PCB[0];
         for(int i=0,minI=i;i<amount4PCBArray;i++){
             minI=i;
             minP=array4PCB[i];
@@ -216,11 +223,20 @@
                         }
                     tempP=array4PCB[i];array4PCB[i]=minP;array4PCB[minI]=tempP;
                 }
+            }*/
+        pcb* tempP=array4PCB[0];
+        for(int i=0;i<amount4Multi;i++){
+            for(int j=0;j<amount4Multi-i-1;j++){
+                if(array4PCB[j]->arriveTime > array4PCB[j+1]->arriveTime){
+                    tempP=array4PCB[j];array4PCB[j]=array4PCB[j+1];array4PCB[j+1]=tempP;
+                }
             }
-        for(int i=0;i<amount4PCBArray;i++){
-            printf("i=%d,arriveTime=%d\n",i,array4PCB[i]->arriveTime);
-             //show1PCB(array4PCB[i]);
         }
+        for(int i=0;i<amount4PCBArray;i++){
+            //printf("i=%d,arriveTime=%d\n",i,array4PCB[i]->arriveTime);
+            show1PCB(array4PCB[i]);
+        }
+        printf("\n\n"); 
         processorInRunning=NULL;
         //operateReady(); /* 调用sort函数*/
     }
