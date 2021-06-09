@@ -1,6 +1,6 @@
     #include <stdio.h>
     #include <stdlib.h>
-    #define MAXSIZE 320
+    #define MAXSIZE 85
     //#define blockNumber 4
     float count = 0; //缺页次数
     int instrAddr[MAXSIZE]; //指令地址流数组
@@ -72,12 +72,15 @@
             blockList[i]=(blockP)malloc(sizeof(Block));
             blockList[i]->data.pageNum = -1;
             blockList[i]->data.blockNum = i;
+            //printf("data.blockNum=%d\n",blockList[i]->data.blockNum);
             blockList[i]->data.firstInIndex = MAXSIZE+1;
             blockList[i]->data.leastRecentlyUsedIndex = MAXSIZE+1;
         }
         for(int i=0;i<blockNumber;i++){
-            blockList[i]->next=blockList[i+1%blockNumber];
+            blockList[i]->next=blockList[(i+1)%blockNumber];
+            //printf("blockList[i]->data.blockNum=%d,next->num=%d\n",blockList[i]->data.blockNum,blockList[i]->next->data.blockNum);
         }
+
 /*
         block1 = (blockP)malloc(sizeof(Block));
         block2 = (blockP)malloc(sizeof(Block));
