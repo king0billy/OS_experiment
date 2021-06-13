@@ -1,21 +1,19 @@
     #include <stdio.h>
     #include <stdlib.h>
     #define MAXSIZE 85
-    //#define blockNumber 4
     float count = 0; //缺页次数
     int instrAddr[MAXSIZE]; //指令地址流数组
     int pageAddr[MAXSIZE]; //页地址流数组
 
-    typedef struct Data //数据域
-    {
+    typedef struct Data{
         int pageNum; //装进的用户虚存页号
         int blockNum; //块号
         int firstInIndex;//首次调入内存的index//MAXSIZE+1
         int leastRecentlyUsedIndex;//最后一次使用的index//-99
     } Data;
 
-    typedef struct BlockNode //单向循环链表
-    {
+    typedef struct BlockNode{
+        //单向循环链表
         Data data;
         struct BlockNode *next;
     } Block, *blockP;
@@ -23,10 +21,6 @@
     //定义内存块
     int blockNumber=3;
     blockP* blockList;
-/*    blockP block1;
-    blockP block2;
-    blockP block3;
-    blockP block4;*/
     void print(int pageNum, int virAddr, int pos,Block *p,char* shit){
         printf("%d\t", pos);
         printf("%d\t", virAddr);
@@ -36,15 +30,9 @@
         for(int i=0;i<blockNumber;i++){
             printf("%d\t",blockList[i]->data.pageNum);
         }
-/*        printf("%d\t",block1->data.pageNum);
-        printf("%d\t",block2->data.pageNum);
-        printf("%d\t",block3->data.pageNum);
-        printf("%d\t",block4->data.pageNum);*/
         printf("\n");
     }
     int commonPack(int pageNum, int virAddr, int pos,Block *p){
-            //遍历所有内存块，若不进行任何操作则遍历结束时候仍指向block1
-            //if(type==1){
                 for(int i = 0; i < blockNumber; i++) {
                     //块为空闲
                     if(p->data.pageNum == -1) {
@@ -62,7 +50,6 @@
                     }
                     p = p->next;
                 }
-           // }
             return 0;
     }
     void initialize() //初始化
@@ -72,47 +59,12 @@
             blockList[i]=(blockP)malloc(sizeof(Block));
             blockList[i]->data.pageNum = -1;
             blockList[i]->data.blockNum = i;
-            //printf("data.blockNum=%d\n",blockList[i]->data.blockNum);
             blockList[i]->data.firstInIndex = MAXSIZE+1;
             blockList[i]->data.leastRecentlyUsedIndex = MAXSIZE+1;
         }
         for(int i=0;i<blockNumber;i++){
             blockList[i]->next=blockList[(i+1)%blockNumber];
-            //printf("blockList[i]->data.blockNum=%d,next->num=%d\n",blockList[i]->data.blockNum,blockList[i]->next->data.blockNum);
         }
-
-/*
-        block1 = (blockP)malloc(sizeof(Block));
-        block2 = (blockP)malloc(sizeof(Block));
-        block3 = (blockP)malloc(sizeof(Block));
-        block4 = (blockP)malloc(sizeof(Block));
-
-        block1->data.pageNum = -1;
-        block2->data.pageNum = -1;
-        block3->data.pageNum = -1;
-        block4->data.pageNum = -1;
-
-        block1->data.blockNum = 0;
-        block2->data.blockNum = 1;
-        block3->data.blockNum = 2;
-        block4->data.blockNum = 3;
-
-        block1->data.firstInIndex = MAXSIZE+1;
-        block2->data.firstInIndex = MAXSIZE+1;
-        block3->data.firstInIndex = MAXSIZE+1;
-        block4->data.firstInIndex = MAXSIZE+1;
-
-        block1->data.leastRecentlyUsedIndex = MAXSIZE+1;
-        block2->data.leastRecentlyUsedIndex = MAXSIZE+1;
-        block3->data.leastRecentlyUsedIndex = MAXSIZE+1;
-        block4->data.leastRecentlyUsedIndex = MAXSIZE+1;
-
-        block1->next = block2;
-        block2->next = block3;
-        block3->next = block4;
-        block4->next = block1;
-*/
-
         for(int i = 0; i < MAXSIZE; ) //初始化地址流//没说指令不能重复?0,320都出现了,如27出现了两次
         {
             int m = rand() % MAXSIZE;
@@ -151,13 +103,10 @@
             allBlockPageNum[i] = p->data.pageNum;
             p = p->next;
         }
-        //int nextAddr[blockNumber]={MAXSIZE+1};
         int nextAddr[blockNumber];
         for(int i=0;i<blockNumber;i++){
             nextAddr[i]=MAXSIZE+1;
         }
-        //int nextAddr[blockNumber]={0,0,0,0}; //记录已装入内存的页地址下次在指令流中出现的位置
-        //int nextAddr[blockNumber]; //记录已装入内存的页地址下次在指令流中出现的位置
         for(int i = 0; i < blockNumber; i++){
             for(int j = pos; j < MAXSIZE; j++){
                 if(allBlockPageNum[i] == pageAddr[j]){ //找到第一个位置即停止
@@ -267,6 +216,5 @@
 
         initialize();
         calculate();
-
         return 0;
     }
