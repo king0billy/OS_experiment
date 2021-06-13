@@ -1,35 +1,27 @@
 #include <stdio.h>
-#include <math.h>
-#include <string.h>
 #include <stdlib.h>
 
-#define MEMORY_SIZE 640
-#define ALLOCATED 1
-#define FREE 0
+#define MAXSIZE 640
 
-typedef struct partitionNode *partitionList;
 struct partitionNode{
 	int processID;
+	int status;
 	int startingAddress;
 	int size;
-	int status;
-	partitionList previous;
-	partitionList next;
+	struct partitionNode* previous;
+	struct partitionNode* next;
 };
 
-partitionList head, nowList;
-
-partitionList getAPartition() {
-	return (partitionList)malloc(sizeof(struct partitionNode));
+struct partitionNode* headNode;
+struct partitionNode* getAPartition() {
+	return (struct partitionNode*)malloc(sizeof(struct partitionNode));
 }
 
-void selectAlgorithm();
-
-partitionList initPartition() {
-	partitionList pointer = getAPartition();
+struct partitionNode* initPartition() {
+	struct partitionNode* pointer = getAPartition();
 	pointer->startingAddress = 0;
-	pointer->size = MEMORY_SIZE;
-	pointer->status = FREE;
+	pointer->size = MAXSIZE;
+	pointer->status = 0;
 	pointer->processID = -99;
 	pointer->previous = NULL;
 	pointer->next = NULL;
@@ -38,22 +30,22 @@ partitionList initPartition() {
 
 
 //在链表位置p处为编号为processID，大小为processSize的作业分配空间
-int allocation(int processID, int processSize, partitionList pointer) {
+int allocation(int processID, int processSize, struct partitionNode* pointer) {
 	if (pointer == NULL)   //无合适空间可分配
 		return 0;
 
 	if (pointer->size == processSize) {   //分区整块分配
-		pointer->status = ALLOCATED;
+		pointer->status = 1;
 		pointer->processID = processID;
 	} else {                  //分割分区
-		partitionList newPartition = getAPartition();
+		struct partitionNode* newPartition = getAPartition();
 		newPartition->startingAddress = pointer->startingAddress + processSize;
 		newPartition->size = pointer->size - processSize;
-		newPartition->status = FREE;
+		newPartition->status = 0;
 		newPartition->processID = -99;
 
 		pointer->size = processSize;
-		pointer->status = ALLOCATED;
+		pointer->status = 1;
 		pointer->processID = processID;
 
 		newPartition->next = pointer->next;
@@ -65,11 +57,11 @@ int allocation(int processID, int processSize, partitionList pointer) {
 
 
 //首次适应算法
-partitionList firstFitFindFreePartition(int processSize) {
-	partitionList pointer = head;
+struct partitionNode* firstFitFindFreePartition(int processSize) {
+	struct partitionNode* pointer = headNode;
 
 	while (pointer) {
-		if (pointer->status == FREE && pointer->size >= processSize)
+		if (pointer->status == 0 && pointer->size >= processSize)
 			return pointer;
 		pointer = pointer->next;
 	}
@@ -85,12 +77,12 @@ int firstFitAllocation(int processID, int processSize) {
 
 
 //最佳适应算法
-partitionList bestFitFindFreePartition(int processSize) {
-	partitionList pointer = head, minP = NULL;
-	int minSize = MEMORY_SIZE + 1;
+struct partitionNode* bestFitFindFreePartition(int processSize) {
+	struct partitionNode* pointer = headNode; struct partitionNode* minP = NULL;
+	int minSize = MAXSIZE + 1;
 
 	while (pointer) {
-		if (pointer->status == FREE && pointer->size >= processSize) {
+		if (pointer->status == 0 && pointer->size >= processSize) {
 			if (pointer->size < minSize) {
 				minSize = pointer->size;
 				minP = pointer;
@@ -109,7 +101,7 @@ int bestFitAllocation(int processID, int processSize) {
 
 int freeAllocation(int processID) {
 	//寻找作业所在分区
-	partitionList pointer = head;
+	struct partitionNode* pointer = headNode;
 
 	while (pointer) {
 		if (pointer->processID == processID) {
@@ -122,17 +114,17 @@ int freeAllocation(int processID) {
 		return 0;
 
 	//不是首块分区且与前一空闲分区相连
-	if (pointer != head && pointer->previous->status == FREE &&
+	if (pointer != headNode && pointer->previous->status == 0 &&
 			pointer->previous->startingAddress + pointer->previous->size == pointer->startingAddress) {
-		partitionList preNode = pointer->previous;
-		partitionList nextNode = pointer->next;
+		struct partitionNode* preNode = pointer->previous;
+		struct partitionNode* nextNode = pointer->next;
 
 		preNode->size += pointer->size;
 		preNode->next = pointer->next;
 		nextNode->previous = preNode;
 
 		//与后一空闲分区相连
-		if (pointer->next->status == FREE &&
+		if (pointer->next->status == 0 &&
 				 pointer->startingAddress + pointer->size == pointer->next->startingAddress) {
 			preNode->size += nextNode->size;
 			preNode->next = nextNode->next;
@@ -145,18 +137,18 @@ int freeAllocation(int processID) {
 
 	} else {
 		//不是最后一个分区且与后一空闲分区相连
-		if (pointer->next != NULL && pointer->next->status == FREE &&
+		if (pointer->next != NULL && pointer->next->status == 0 &&
 				pointer->startingAddress + pointer->size == pointer->next->startingAddress) {
-			partitionList nextNode = pointer->next;
+			struct partitionNode* nextNode = pointer->next;
 			pointer->size += nextNode->size;
 			pointer->next = nextNode->next;
 			if(nextNode->next!=NULL)nextNode->next->previous = pointer;
 			//todo 解决删除唯一一个分区的bug
-			pointer->status = FREE;
+			pointer->status = 0;
 			pointer->processID = -99;
 			free(nextNode);
 		} else {
-			pointer->status = FREE;
+			pointer->status = 0;
 			pointer->processID = -99;
 		}
 	}
@@ -164,7 +156,7 @@ int freeAllocation(int processID) {
 }
 
 void displayAllocation() {
-	partitionList pointer = head;
+	struct partitionNode* pointer = headNode;
 
 	printf("\n|%4s\t|%3s\t|%3s\t|%3s\n", "分区号","起始地址", "分区大小", "分区状态");
 
@@ -249,8 +241,7 @@ void selectAlgorithm() {
 
 int main()
 {
-	head = initPartition();
-	nowList = head;
+	headNode = initPartition();
 	selectAlgorithm();
 	return 0;
 }
