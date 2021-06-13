@@ -4,214 +4,208 @@
 #include <stdlib.h>
 
 #define MEMORY_SIZE 640
-#define MAX_PRO 20
-#define ALLOCED 1
+#define ALLOCATED 1
 #define FREE 0
 
-typedef struct SubAreaNode *SubAreaList;
-struct SubAreaNode
-{
-	int addr;
+typedef struct partitionNode *partitionList;
+struct partitionNode{
+	int processID;
+	int startingAddress;
 	int size;
-	int stat;
-	int pid;
-
-	SubAreaList pre;
-	SubAreaList next;
+	int status;
+	partitionList previous;
+	partitionList next;
 };
 
-SubAreaList head, nowList;
+partitionList head, nowList;
 
-SubAreaList getASubArea() {
-	return (SubAreaList)malloc(sizeof(struct SubAreaNode));
+partitionList getAPartition() {
+	return (partitionList)malloc(sizeof(struct partitionNode));
 }
 
-void selectAlogrithm();
+void selectAlgorithm();
 
-SubAreaList initSubArea() {
-	SubAreaList p = getASubArea();
-	p->addr = 0;
-	p->size = MEMORY_SIZE;
-	p->stat = FREE;
-	p->pid = -99;
-	p->pre = NULL;
-	p->next = NULL;
-
-	return p;
+partitionList initPartition() {
+	partitionList pointer = getAPartition();
+	pointer->startingAddress = 0;
+	pointer->size = MEMORY_SIZE;
+	pointer->status = FREE;
+	pointer->processID = -99;
+	pointer->previous = NULL;
+	pointer->next = NULL;
+	return pointer;
 }
 
 
-//在链表位置p处为编号为pid，大小为psize的作业分配空间
-int alloc(int pid, int psize, SubAreaList p) {
-	if (p == NULL)   //无合适空间可分配
+//在链表位置p处为编号为processID，大小为processSize的作业分配空间
+int allocation(int processID, int processSize, partitionList pointer) {
+	if (pointer == NULL)   //无合适空间可分配
 		return 0;
 
-	if (p->size == psize) {   //分区整块分配
-		p->stat = ALLOCED;
-		p->pid = pid;
+	if (pointer->size == processSize) {   //分区整块分配
+		pointer->status = ALLOCATED;
+		pointer->processID = processID;
 	} else {                  //分割分区
-		SubAreaList newSubArea = getASubArea();
-		newSubArea->addr = p->addr + psize;
-		newSubArea->size = p->size - psize;
-		newSubArea->stat = FREE;
-		newSubArea->pid = -99;
+		partitionList newPartition = getAPartition();
+		newPartition->startingAddress = pointer->startingAddress + processSize;
+		newPartition->size = pointer->size - processSize;
+		newPartition->status = FREE;
+		newPartition->processID = -99;
 
-		p->size = psize;
-		p->stat = ALLOCED;
-		p->pid = pid;
+		pointer->size = processSize;
+		pointer->status = ALLOCATED;
+		pointer->processID = processID;
 
-		newSubArea->next = p->next;
-		p->next = newSubArea;
-		newSubArea->pre = p;
-
+		newPartition->next = pointer->next;
+		pointer->next = newPartition;
+		newPartition->previous = pointer;
 	}
-
 	return 1;
 }
 
 
 //首次适应算法
-SubAreaList ffFindFreeSubArea(int psize) {
-	SubAreaList p = head;
+partitionList firstFitFindFreePartition(int processSize) {
+	partitionList pointer = head;
 
-	while (p) {
-		if (p->stat == FREE && p->size >= psize)
-			return p;
-		p = p->next;
+	while (pointer) {
+		if (pointer->status == FREE && pointer->size >= processSize)
+			return pointer;
+		pointer = pointer->next;
 	}
 
 	return NULL;
 }
 
 
-int ffAlloc(int pid, int psize) {
-	return alloc(pid, psize, ffFindFreeSubArea(psize));
+int firstFitAllocation(int processID, int processSize) {
+	return allocation(processID, processSize, firstFitFindFreePartition(processSize));
 }
 
 
 
 //最佳适应算法
-SubAreaList bfFindFreeSubArea(int psize) {
-	SubAreaList p = head, minP = NULL;
+partitionList bestFitFindFreePartition(int processSize) {
+	partitionList pointer = head, minP = NULL;
 	int minSize = MEMORY_SIZE + 1;
 
-	while (p) {
-		if (p->stat == FREE && p->size >= psize) {
-			if (p->size < minSize) {
-				minSize = p->size;
-				minP = p;
+	while (pointer) {
+		if (pointer->status == FREE && pointer->size >= processSize) {
+			if (pointer->size < minSize) {
+				minSize = pointer->size;
+				minP = pointer;
 			}
 		}
-		p = p->next;
+		pointer = pointer->next;
 	}
 
 	return minP;
 }
 
-int bfAlloc(int pid, int psize) {
-	return alloc(pid, psize, bfFindFreeSubArea(psize));
+int bestFitAllocation(int processID, int processSize) {
+	return allocation(processID, processSize, bestFitFindFreePartition(processSize));
 }
 
 
-int freeAlloc(int pid) {
+int freeAllocation(int processID) {
 	//寻找作业所在分区
-	SubAreaList p = head;
+	partitionList pointer = head;
 
-	while (p) {
-		if (p->pid == pid) {
+	while (pointer) {
+		if (pointer->processID == processID) {
 			break;
 		}
-		p = p->next;
+		pointer = pointer->next;
 	}
 
-	if (p == NULL)
+	if (pointer == NULL)
 		return 0;
 
 	//不是首块分区且与前一空闲分区相连
-	if (p != head && p->pre->stat == FREE &&
-			p->pre->addr + p->pre->size == p->addr) {
-		SubAreaList preNode = p->pre;
-		SubAreaList nextNode = p->next;
+	if (pointer != head && pointer->previous->status == FREE &&
+			pointer->previous->startingAddress + pointer->previous->size == pointer->startingAddress) {
+		partitionList preNode = pointer->previous;
+		partitionList nextNode = pointer->next;
 
-		preNode->size += p->size;
-		preNode->next = p->next;
-		nextNode->pre = preNode;
+		preNode->size += pointer->size;
+		preNode->next = pointer->next;
+		nextNode->previous = preNode;
 
 		//与后一空闲分区相连
-		if (p->next->stat == FREE &&
-				 p->addr + p->size == p->next->addr) {
+		if (pointer->next->status == FREE &&
+				 pointer->startingAddress + pointer->size == pointer->next->startingAddress) {
 			preNode->size += nextNode->size;
 			preNode->next = nextNode->next;
-			nextNode->next->pre = preNode;
+			nextNode->next->previous = preNode;
 
 			free(nextNode);
 		}
 
-		free(p);
+		free(pointer);
 
 	} else {
 		//不是最后一个分区且与后一空闲分区相连
-		if (p->next != NULL && p->next->stat == FREE &&
-				p->addr + p->size == p->next->addr) {
-			SubAreaList nextNode = p->next;
-			p->size += nextNode->size;
-			p->next = nextNode->next;
-			if(nextNode->next!=NULL)nextNode->next->pre = p;
-			p->stat = FREE;
-			p->pid = -99;
+		if (pointer->next != NULL && pointer->next->status == FREE &&
+				pointer->startingAddress + pointer->size == pointer->next->startingAddress) {
+			partitionList nextNode = pointer->next;
+			pointer->size += nextNode->size;
+			pointer->next = nextNode->next;
+			if(nextNode->next!=NULL)nextNode->next->previous = pointer;
+			//todo 解决删除唯一一个分区的bug
+			pointer->status = FREE;
+			pointer->processID = -99;
 			free(nextNode);
 		} else {
-			p->stat = FREE;
-			p->pid = -99;
+			pointer->status = FREE;
+			pointer->processID = -99;
 		}
 	}
-
 	return 1;
 }
 
-void displayAlloc() {
-	SubAreaList p = head;
+void displayAllocation() {
+	partitionList pointer = head;
 
 	printf("\n|%4s\t|%3s\t|%3s\t|%3s\n", "分区号","起始地址", "分区大小", "分区状态");
 
-	while (p) {
-		printf("|%3d\t|%3d\t\t|%3d\t\t|",p->pid, p->addr,p->size);
-		if(p->stat==1)printf("已分配");
+	while (pointer) {
+		printf("|%3d\t|%3d\t\t|%3d\t\t|",pointer->processID, pointer->startingAddress,pointer->size);
+		if(pointer->status==1)printf("已分配");
 		else printf("空闲");
 		printf("\n");
-		p = p->next;
+		pointer = pointer->next;
 	}
 	printf("\n");
 }
 
 
-void inputCtrl(int (*allocAlogrithm)(int,int)) {
+void inputControl(int (*allocAlgorithm)(int,int)) {
 	printf("申请按 1 释放按 2 退出按 9\n");
 	char T[5];
 	scanf("%s", T);
 	while (T[0] != '9') {
 		if (T[0] == '1') {
-			int pid, size;
+			int processID, size;
 			printf("输入要申请空间的作业id: ");
-			scanf("%d", &pid );
+			scanf("%d", &processID );
             printf("输入大小: ");
             scanf("%d", &size);
-			int ret = allocAlogrithm(pid, size);
+			int ret = allocAlgorithm(processID, size);
 			if (ret) {
 				printf("申请成功");
-				displayAlloc();
+				displayAllocation();
 			}
 			else {
 				printf("\n内存不足 申请失败\n\n");
 			}
 		} else{
 		    if (T[0] == '2') {
-                int pid;
-                printf("输入要释放空间的作业id: ");scanf("%d", &pid);
-                int ret = freeAlloc(pid);
+                int processID;
+                printf("输入要释放空间的作业id: ");scanf("%d", &processID);
+                int ret = freeAllocation(processID);
                 if (ret) {
                     printf("释放成功");
-                    displayAlloc();
+                    displayAllocation();
                 } else {
                     printf("未找到相关作业，释放失败\n\n");
                 }
@@ -225,17 +219,17 @@ void inputCtrl(int (*allocAlogrithm)(int,int)) {
 }
 
 
-void ffAllocCtrl() {
-		inputCtrl(ffAlloc);
+void firstFitAllocationControl() {
+		inputControl(firstFitAllocation);
 }
 
-void bfAllocCtrl() {
-		inputCtrl(bfAlloc);
+void bestFitAllocationControl() {
+		inputControl(bestFitAllocation);
 }
 
 
 
-void selectAlogrithm() {
+void selectAlgorithm() {
 	system("cls");
 	printf("按1_首次适应算法                ");
 	printf("按2_最佳适应算法             \n");
@@ -245,9 +239,9 @@ void selectAlogrithm() {
 	scanf("%s", op);
 
 	if (!strcmp(op, "1"))
-		ffAllocCtrl();
+		firstFitAllocationControl();
 	else if (!strcmp(op, "2"))
-		bfAllocCtrl();
+		bestFitAllocationControl();
 	else {
 		exit(0);
 	}
@@ -255,8 +249,8 @@ void selectAlogrithm() {
 
 int main()
 {
-	head = initSubArea();
+	head = initPartition();
 	nowList = head;
-	selectAlogrithm();
+	selectAlgorithm();
 	return 0;
 }
