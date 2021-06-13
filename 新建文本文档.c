@@ -30,14 +30,18 @@ struct partitionNode* initPartition() {
 
 
 //在链表位置p处为编号为processID，大小为processSize的作业分配空间
-int allocation(int processID, int processSize, struct partitionNode* pointer) {
-	if (pointer == NULL)   //无合适空间可分配
+int allocate(int processID, int processSize, struct partitionNode* pointer) {
+	if (pointer == NULL){
+	    //没有空闲内存了,分配失败
 		return 0;
+	}
 
-	if (pointer->size == processSize) {   //分区整块分配
+	if (pointer->size == processSize) {
+	    //分配整块的分区
 		pointer->status = 1;
 		pointer->processID = processID;
-	} else {                  //分割分区
+	} else {
+	    //分割空闲的内存再分配
 		struct partitionNode* newPartition = getAPartition();
 		newPartition->startingAddress = pointer->startingAddress + processSize;
 		newPartition->size = pointer->size - processSize;
@@ -71,38 +75,37 @@ struct partitionNode* firstFitFindFreePartition(int processSize) {
 
 
 int firstFitAllocation(int processID, int processSize) {
-	return allocation(processID, processSize, firstFitFindFreePartition(processSize));
+	return allocate(processID, processSize, firstFitFindFreePartition(processSize));
 }
 
 
 
 //最佳适应算法
 struct partitionNode* bestFitFindFreePartition(int processSize) {
-	struct partitionNode* pointer = headNode; struct partitionNode* minP = NULL;
+	struct partitionNode* pointer = headNode; struct partitionNode* minPointer = NULL;
 	int minSize = MAXSIZE + 1;
 
 	while (pointer) {
 		if (pointer->status == 0 && pointer->size >= processSize) {
 			if (pointer->size < minSize) {
 				minSize = pointer->size;
-				minP = pointer;
+				minPointer = pointer;
 			}
 		}
 		pointer = pointer->next;
 	}
 
-	return minP;
+	return minPointer;
 }
 
 int bestFitAllocation(int processID, int processSize) {
-	return allocation(processID, processSize, bestFitFindFreePartition(processSize));
+	return allocate(processID, processSize, bestFitFindFreePartition(processSize));
 }
 
 
 int freeAllocation(int processID) {
-	//寻找作业所在分区
+	//根据输入的processID寻找进程所在的分区
 	struct partitionNode* pointer = headNode;
-
 	while (pointer) {
 		if (pointer->processID == processID) {
 			break;
@@ -110,12 +113,15 @@ int freeAllocation(int processID) {
 		pointer = pointer->next;
 	}
 
-	if (pointer == NULL)
-		return 0;
+	if (pointer == NULL){
+	    //找不到
+	    return 0;
+	}
 
-	//不是首块分区且与前一空闲分区相连
+
 	if (pointer != headNode && pointer->previous->status == 0 &&
 			pointer->previous->startingAddress + pointer->previous->size == pointer->startingAddress) {
+			//前面紧接着一个size不为0的空闲分区
 		struct partitionNode* preNode = pointer->previous;
 		struct partitionNode* nextNode = pointer->next;
 
@@ -123,22 +129,21 @@ int freeAllocation(int processID) {
 		preNode->next = pointer->next;
 		nextNode->previous = preNode;
 
-		//与后一空闲分区相连
+
 		if (pointer->next->status == 0 &&
 				 pointer->startingAddress + pointer->size == pointer->next->startingAddress) {
+				 //后面紧接着一个size不为0的空闲分区
 			preNode->size += nextNode->size;
 			preNode->next = nextNode->next;
 			nextNode->next->previous = preNode;
-
 			free(nextNode);
 		}
-
 		free(pointer);
 
 	} else {
-		//不是最后一个分区且与后一空闲分区相连
 		if (pointer->next != NULL && pointer->next->status == 0 &&
 				pointer->startingAddress + pointer->size == pointer->next->startingAddress) {
+			//后面紧接着一个size不为0的空闲分区
 			struct partitionNode* nextNode = pointer->next;
 			pointer->size += nextNode->size;
 			pointer->next = nextNode->next;
@@ -148,6 +153,7 @@ int freeAllocation(int processID) {
 			pointer->processID = -99;
 			free(nextNode);
 		} else {
+		    //不和空闲分区相连
 			pointer->status = 0;
 			pointer->processID = -99;
 		}
@@ -171,7 +177,8 @@ void displayAllocation() {
 }
 
 
-void inputControl(int (*allocAlgorithm)(int,int)) {
+void inputControl(int (*allocateAlgorithm)(int,int)) {
+    //传入的参数是一个函数
 	printf("申请按 1 释放按 2 退出按 9\n");
 	char T[5];
 	scanf("%s", T);
@@ -182,8 +189,8 @@ void inputControl(int (*allocAlgorithm)(int,int)) {
 			scanf("%d", &processID );
             printf("输入大小: ");
             scanf("%d", &size);
-			int ret = allocAlgorithm(processID, size);
-			if (ret) {
+			int allocateResult = allocateAlgorithm(processID, size);
+			if (allocateResult) {
 				printf("申请成功");
 				displayAllocation();
 			}
@@ -194,8 +201,8 @@ void inputControl(int (*allocAlgorithm)(int,int)) {
 		    if (T[0] == '2') {
                 int processID;
                 printf("输入要释放空间的作业id: ");scanf("%d", &processID);
-                int ret = freeAllocation(processID);
-                if (ret) {
+                int allocateResult = freeAllocation(processID);
+                if (allocateResult) {
                     printf("释放成功");
                     displayAllocation();
                 } else {
