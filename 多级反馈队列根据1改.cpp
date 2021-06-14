@@ -25,7 +25,7 @@
     PCB** multi;//多级反馈队列队头指针
     int amount4Multi=0;//共多少级队列
         moveDown(){
-        //进程完成一个时间片后的移动
+        //进程完成一个时间片后的移动函数 
             PCB* son,*rear;
             int index=processorInRunning->belong2Index;
             son=processorInRunning;
@@ -42,13 +42,13 @@
             }
         }
         int judgeNULL(){
-        //找出首个该执行的进程所在队列级别
+        //找出首个应该执行的进程所在队列级别
             int index=0;
             for(;index<amount4Multi&&multi[index]->link==NULL;index++);
             return index;
         }
         PCB* extract(){
-        //从多级队列中找出应该执行的进程
+        //从多级队列中抽出应该执行的进程
             int index=judgeNULL();
             PCB* son=NULL;
             if(index<amount4Multi){
@@ -216,8 +216,8 @@
         nowIndex=judgeNULL();
         if(nowIndex!=amount4Multi)processorInRunning=extract();
         if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}
-        if(0==operateReady()){
-            //没发生插入
+        if(0==operateReady()||processorInRunning->belong2Index==0){
+            //没发生插入或发生插入但是是0级队列
             if (processorInRunning->runTime + processorInRunning->timeSlot >= processorInRunning->needTime){
             //没用完一个时间片就执行完毕
                 relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
@@ -246,35 +246,17 @@
             }
             //执行一个时间片中途被打断,如果处理机正在第i队列中为某进程服务时又有新进程进入任一优先级较高的队列，此时须立即把正在运行的进程放回到第i队列的末尾
             else{
-                if(processorInRunning->belong2Index!=0){
-                    processorInRunning->runTime = processorInRunning->runTime+ array4PCB[FirstInsertIndex]->arriveTime - relativeTime;
-                    relativeTime += array4PCB[FirstInsertIndex]->arriveTime - relativeTime;
-                                                FirstInsertIndex++;
-                    processorInRunning->state = 'w';
-                    // 放回准备队列里
-                    PCB*temp;
-                    for(temp=multi[processorInRunning->belong2Index];temp->link!=NULL;temp=temp->link);
-                    processorInRunning->link=NULL;
-                    temp->link=processorInRunning;
-                    temp->link->link=NULL;//todo why
-                }
-                else{
-                    //0级队列
-                    if (processorInRunning->runTime + processorInRunning->timeSlot >= processorInRunning->needTime){
-                        //没用完一个时间片就执行完毕
-                        relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
-                        processorInRunning->finishTime=relativeTime;//!!!!!!!!!!!!!
-                        processorInRunning->runTime=processorInRunning->needTime;
-                        destroy(); //* 调用destroy函数*//*
-                    }
-                    else{
-                    //执行完一个时间片
-                        relativeTime += processorInRunning->timeSlot;
-                        processorInRunning->runTime = processorInRunning->runTime+ processorInRunning->timeSlot;
-                        processorInRunning->state = 'w';
-                        moveDown(); //*调用sort函数*//*
-                    }
-                }
+                //if(processorInRunning->belong2Index!=0)
+                processorInRunning->runTime = processorInRunning->runTime+ array4PCB[FirstInsertIndex]->arriveTime - relativeTime;
+                relativeTime += array4PCB[FirstInsertIndex]->arriveTime - relativeTime;
+                                            FirstInsertIndex++;
+                processorInRunning->state = 'w';
+                // 放回准备队列里
+                PCB*temp;
+                for(temp=multi[processorInRunning->belong2Index];temp->link!=NULL;temp=temp->link);
+                processorInRunning->link=NULL;
+                temp->link=processorInRunning;
+                temp->link->link=NULL;//todo why
             }
             showMultiArray();
         }
