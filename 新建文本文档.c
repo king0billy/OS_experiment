@@ -1,178 +1,176 @@
     #include <stdio.h>
     #include <stdlib.h>
     #define MAXSIZE 85
-    float count = 0; //缺页次数
-    int instrAddr[MAXSIZE]; //指令地址流数组
-    int pageAddr[MAXSIZE]; //页地址流数组
+    int pageFaultCount = 0; //缺页次数
+    int instructionArray[MAXSIZE]; //指令地址流数组
+    int pageArray[MAXSIZE]; //页地址流数组
 
-    typedef struct Data{
-        int pageNum; //装进的用户虚存页号
-        int blockNum; //块号
-        int firstInIndex;//首次调入内存的index//MAXSIZE+1
-        int leastRecentlyUsedIndex;//最后一次使用的index//-99
-    } Data;
+    typedef struct Block{
+        int blockID; //物理主存块号
+        int pageID; //块中装进的虚存页号
+        int firstInIndex;//首次调入内存的指令index,初始值为MAXSIZE+1
+        int leastRecentlyUsedIndex;//最后一次使用的指令index初始值为-99
+        struct Block *next;
+    } Block;
 
-    typedef struct BlockNode{
-        //单向循环链表
-        Data data;
-        struct BlockNode *next;
-    } Block, *blockP;
-
-    //定义内存块
     int blockNumber=3;
-    blockP* blockList;
-    void print(int pageNum, int virAddr, int pos,Block *p,char* shit){
-        printf("%d\t", pos);
-        printf("%d\t", virAddr);
-        printf("%d\t", pageNum);
-        printf("%d\t", p->data.blockNum);
-        printf("%s\t",shit);
+    Block** blockList;
+    void print(int pageID, int instructionID, int NO,Block *pointer,char* tag){
+        printf("%d\t", NO);
+        printf("%d\t", instructionID);
+        printf("%d\t", pageID);
+        printf("%d\t", pointer->blockID);
+        printf("%s\t",tag);
         for(int i=0;i<blockNumber;i++){
-            printf("%d\t",blockList[i]->data.pageNum);
+            printf("%d\t",blockList[i]->pageID);
         }
         printf("\n");
     }
-    int commonPack(int pageNum, int virAddr, int pos,Block *p){
-                for(int i = 0; i < blockNumber; i++) {
-                    //块为空闲
-                    if(p->data.pageNum == -1) {
-                        p->data.pageNum = pageNum;
-                        count++; //缺页次数+1R
-                        print(pageNum,virAddr,pos,p,"T");
-                        p->data.firstInIndex=pos;
-                        p->data.leastRecentlyUsedIndex=pos;
-                        return 1;
-                    }
-                    if(p->data.pageNum == pageNum){
-                        print(pageNum,virAddr,pos,p,"F");
-                        p->data.leastRecentlyUsedIndex=pos;
-                        return 1;
-                    }
-                    p = p->next;
-                }
-            return 0;
+    int commonPack(int pageID, int instructionID, int NO,Block *pointer){
+    //没发生置换的通用代码块,实现功能聚合的代码复用
+        for(int i = 0; i < blockNumber; i++) {
+            //块为空闲
+            if(pointer->pageID == -1) {
+                pointer->pageID = pageID;
+                pageFaultCount++; //缺页次数+1R
+                print(pageID,instructionID,NO,pointer,"T");
+                pointer->firstInIndex=NO;
+                pointer->leastRecentlyUsedIndex=NO;
+                return 1;
+            }
+            if(pointer->pageID == pageID){
+                print(pageID,instructionID,NO,pointer,"F");
+                pointer->leastRecentlyUsedIndex=NO;
+                return 1;
+            }
+            pointer = pointer->next;
+        }
+        return 0;
     }
-    void initialize() //初始化
-    {	
-    	blockList=(blockP*)malloc(blockNumber*sizeof(blockP));
+    void initializeInstruction() {
+        //根据题目要求初始化指令序列
+    	blockList=(Block**)malloc(blockNumber*sizeof(Block*));
         for(int i=0;i<blockNumber;i++){
-            blockList[i]=(blockP)malloc(sizeof(Block));
-            blockList[i]->data.pageNum = -1;
-            blockList[i]->data.blockNum = i;
-            blockList[i]->data.firstInIndex = MAXSIZE+1;
-            blockList[i]->data.leastRecentlyUsedIndex = MAXSIZE+1;
+            //根据输入的块数生成内存块链表
+            blockList[i]=(Block*)malloc(sizeof(Block));
+            blockList[i]->pageID = -1;
+            blockList[i]->blockID = i;
+            blockList[i]->firstInIndex = MAXSIZE+1;
+            blockList[i]->leastRecentlyUsedIndex = MAXSIZE+1;
         }
         for(int i=0;i<blockNumber;i++){
+            //链接成单向循环链表
             blockList[i]->next=blockList[(i+1)%blockNumber];
         }
-        for(int i = 0; i < MAXSIZE; ) //初始化地址流//没说指令不能重复?0,320都出现了,如27出现了两次
-        {
+        for(int i = 0; i < MAXSIZE; ) {
+        //初始化地址流//没说指令不能重复,0,320都出现了,如27出现了两次
             int m = rand() % MAXSIZE;
-            instrAddr[i] = m + 1;
-            pageAddr[i] = instrAddr[i] / 10;
+            instructionArray[i] = m + 1;
+            pageArray[i] = instructionArray[i] / 10;
             i++;
 
             int m1 = rand() % (m - 1);
-            instrAddr[i] = m1;
-            pageAddr[i] = m1 / 10;
+            instructionArray[i] = m1;
+            pageArray[i] = m1 / 10;
             i++;
 
-            instrAddr[i] = m1 + 1;
-            pageAddr[i] = instrAddr[i] / 10;
+            instructionArray[i] = m1 + 1;
+            pageArray[i] = instructionArray[i] / 10;
             i++;
 
             int m2 = rand() % (319 - m1 - 1) + m1 + 2;
-            instrAddr[i] = m2;
-            pageAddr[i] = m2 / 10;
+            instructionArray[i] = m2;
+            pageArray[i] = m2 / 10;
             i++;
 
-            instrAddr[i] = m2 + 1;
-            pageAddr[i] = instrAddr[i] / 10;
+            instructionArray[i] = m2 + 1;
+            pageArray[i] = instructionArray[i] / 10;
             i++;
         }
     }
 
-    //pos为所调用页在地址流中的位置
-    int Optimal(int pageNum, int virAddr, int pos) {
-        Block *p = blockList[0];
-        if(1==commonPack(pageNum,virAddr,pos,p))return 1;
+    //NO为所调用页在地址流中的位置
+    int Optimal(int pageID, int instructionID, int NO) {
+        Block *pointer = blockList[0];
+        if(1==commonPack(pageID,instructionID,NO,pointer))return 1;
 
         //OPT页面置换
         int allBlockPageNum[blockNumber]; //记录已装入内存的页地址
         for(int i = 0; i < blockNumber; i++){
-            allBlockPageNum[i] = p->data.pageNum;
-            p = p->next;
+            allBlockPageNum[i] = pointer->pageID;
+            pointer = pointer->next;
         }
         int nextAddr[blockNumber];
         for(int i=0;i<blockNumber;i++){
             nextAddr[i]=MAXSIZE+1;
         }
         for(int i = 0; i < blockNumber; i++){
-            for(int j = pos; j < MAXSIZE; j++){
-                if(allBlockPageNum[i] == pageAddr[j]){ //找到第一个位置即停止
+            for(int j = NO; j < MAXSIZE; j++){
+                if(allBlockPageNum[i] == pageArray[j]){
+                    //找到第一个位置即停止
                     nextAddr[i] = j;
                     break;
                 }
             }
         }
-        int temp = 0; //页地址
-        int blockPos; //内存块的地址
+        int tempPageID = 0; //页地址
+        int blockNO; //内存块的地址
         //选出距离最远的页地址在内存块中对应的位置
         for(int i = 0; i < blockNumber; i++) {
-            if(nextAddr[i] > temp){
-                temp = nextAddr[i];
-                blockPos = i;
+            if(nextAddr[i] > tempPageID){
+                tempPageID = nextAddr[i];
+                blockNO = i;
             }
         }
         for(int i = 0; i < blockNumber; i++){
-            if(p->data.blockNum == blockPos){
-                p->data.pageNum = pageNum;
-                count++;
-                print(pageNum,virAddr,pos,p,"T&R");
+            if(pointer->blockID == blockNO){
+                pointer->pageID = pageID;
+                pageFaultCount++;
+                print(pageID,instructionID,NO,pointer,"T&R");
             }
-            p = p->next;
+            pointer = pointer->next;
         }
         return 1;
     }
-    int FIFO(int pageNum, int virAddr, int pos){
-        Block *p = blockList[0];
-        if(1==commonPack(pageNum,virAddr,pos,p))return 1;
+    int FIFO(int pageID, int instructionID, int NO){
+        Block *pointer = blockList[0];
+        if(1==commonPack(pageID,instructionID,NO,pointer))return 1;
         int minFIndex=MAXSIZE+1;
-        for(int i=0;i<blockNumber;p=p->next,i++){
-            minFIndex=minFIndex<p->data.firstInIndex?minFIndex:p->data.firstInIndex;
+        for(int i=0;i<blockNumber;pointer=pointer->next,i++){
+            minFIndex=minFIndex<pointer->firstInIndex?minFIndex:pointer->firstInIndex;
         }
-        for(int i=0;i<blockNumber;p=p->next,i++){
-            if(p->data.firstInIndex==minFIndex){
-                p->data.pageNum = pageNum;
-                p->data.firstInIndex=pos;
-                p->data.leastRecentlyUsedIndex=pos;
-                count++;
-                print(pageNum,virAddr,pos,p,"T&R");
+        for(int i=0;i<blockNumber;pointer=pointer->next,i++){
+            if(pointer->firstInIndex==minFIndex){
+                pointer->pageID = pageID;
+                pointer->firstInIndex=NO;
+                pointer->leastRecentlyUsedIndex=NO;
+                pageFaultCount++;
+                print(pageID,instructionID,NO,pointer,"T&R");
             }
         }
         return 1;
     }
-    int LRU(int pageNum, int virAddr, int pos){
-        Block *p = blockList[0];
-        if(1==commonPack(pageNum,virAddr,pos,p))return 1;
+    int LRU(int pageID, int instructionID, int NO){
+        Block *pointer = blockList[0];
+        if(1==commonPack(pageID,instructionID,NO,pointer))return 1;
         int minLIndex=MAXSIZE+1;
-        for(int i=0;i<blockNumber;p=p->next,i++){
-            minLIndex=minLIndex<p->data.leastRecentlyUsedIndex?minLIndex:p->data.leastRecentlyUsedIndex;
+        for(int i=0;i<blockNumber;pointer=pointer->next,i++){
+            minLIndex=minLIndex<pointer->leastRecentlyUsedIndex?minLIndex:pointer->leastRecentlyUsedIndex;
         }
-        for(int i=0;i<blockNumber;p=p->next,i++){
-            if(p->data.leastRecentlyUsedIndex==minLIndex){
-                p->data.pageNum = pageNum;
-                p->data.firstInIndex=pos;
-                p->data.leastRecentlyUsedIndex=pos;
-                count++;
-                print(pageNum,virAddr,pos,p,"T&R");
+        for(int i=0;i<blockNumber;pointer=pointer->next,i++){
+            if(pointer->leastRecentlyUsedIndex==minLIndex){
+                pointer->pageID = pageID;
+                pointer->firstInIndex=NO;
+                pointer->leastRecentlyUsedIndex=NO;
+                pageFaultCount++;
+                print(pageID,instructionID,NO,pointer,"T&R");
             }
         }
         return 1;
     }
 
-    void calculate() //计算缺页率
-    {
+    void calculatePageFaultCount() {
+        //计算缺页率
         char trigger[]={'\0','\0'};char* to0;
         do{
             fgets(trigger,2,stdin);
@@ -188,33 +186,32 @@
 
         if(trigger[0]-'0'==1){
             for(int i = 0; i < MAXSIZE; i++){
-                Optimal(pageAddr[i], instrAddr[i], i);
+                Optimal(pageArray[i], instructionArray[i], i);
             }
         }
         else if(trigger[0]-'0'==2){
             for(int i = 0; i < MAXSIZE; i++){
-                FIFO(pageAddr[i], instrAddr[i], i);
+                FIFO(pageArray[i], instructionArray[i], i);
             }
         }
         else{
             for(int i = 0; i < MAXSIZE; i++){
-                LRU(pageAddr[i], instrAddr[i], i);
+                LRU(pageArray[i], instructionArray[i], i);
             }
         }
         printf("\n");
-        printf("缺页次数：%.0f\n", count);
-        printf("计算得到的缺页率为：%.4f \n", count / MAXSIZE);
+        printf("缺页次数：%d\n", pageFaultCount);
+        printf("缺页率为：%.4f \n", pageFaultCount*1.0 / MAXSIZE);
     }
 
-    int main()
-    {
+    int main(){
         printf("先输入内存块总数!\n");
         scanf("%d",&blockNumber);
         printf("----------最佳置换算法(OPT)请按1----------\n");
         printf("----------先进先出算法(FIFO)请按2----------\n");
         printf("----------最近最久未使用算法(LRU)请按3----------\n");
 
-        initialize();
-        calculate();
+        initializeInstruction();
+        calculatePageFaultCount();
         return 0;
     }
