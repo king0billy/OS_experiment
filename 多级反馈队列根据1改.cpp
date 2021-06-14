@@ -62,6 +62,7 @@
     int operateReady(){
         int nowIndex=amount4Multi;
         if(processorInRunning!=NULL)nowIndex=processorInRunning->belong2Index;
+        PCB  *rear=multi[0];
         if(nowIndex==amount4Multi){//processorInRunning==NULL&&现在被单线程占据的话就先执行单线程吧,时间还没到
             if(doneIndex4PCB<amount4PCBArray){
             //跳过中间的空白时间
@@ -73,28 +74,11 @@
                 FirstInsertIndex=doneIndex4PCB;
             }
             nowIndex=0;
-            //在第一队一个时间片中间到达的都要插入
-            PCB  *rear=multi[0];
             for(;rear!=NULL&&rear->link!=NULL;rear=rear->link);
-            if(doneIndex4PCB<amount4PCBArray&&
-            array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot){
-                FirstInsertIndex=doneIndex4PCB;
-            }
-            for(;doneIndex4PCB<amount4PCBArray&&
-            array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot;doneIndex4PCB++){
-                rear->link=array4PCB[doneIndex4PCB];
-                rear=rear->link;
-                array4PCB[doneIndex4PCB]->belong2Index=0;
-                array4PCB[doneIndex4PCB]->timeSlot=multi[0]->timeSlot;
-            }
-            //todo why this is important
-            rear->link=NULL;
-            return 0;
         }
         else{
-            PCB  *rear=multi[0];
-            for(;rear!=NULL&&rear->link!=NULL;rear=rear->link);
             //中断一次而已!!
+            for(;rear!=NULL&&rear->link!=NULL;rear=rear->link);
             if(nowIndex!=0){
                 if(doneIndex4PCB<amount4PCBArray&&
                 array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot){
@@ -107,21 +91,22 @@
                     if(doneIndex4PCB>FirstInsertIndex)return 1;
                 }
             }
-            else{
-                //在第一队一个时间片发生中间的都插入
-                if(doneIndex4PCB<amount4PCBArray&&
-                array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot){
-                    FirstInsertIndex=doneIndex4PCB;
-                }
-                for(;doneIndex4PCB<amount4PCBArray&&
-                array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot;doneIndex4PCB++){
-                    rear->link=array4PCB[doneIndex4PCB];
-                    rear=rear->link;
-                    array4PCB[doneIndex4PCB]->belong2Index=0;
-                    array4PCB[doneIndex4PCB]->timeSlot=multi[0]->timeSlot;
-                }
-                if(doneIndex4PCB>FirstInsertIndex)return 1;
+        }
+        if(nowIndex==0){
+            //在第一队一个时间片中间到达的都要插入
+            if(doneIndex4PCB<amount4PCBArray&&
+            array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot){
+                FirstInsertIndex=doneIndex4PCB;
             }
+            for(;doneIndex4PCB<amount4PCBArray&&
+            array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot;doneIndex4PCB++){
+                rear->link=array4PCB[doneIndex4PCB];
+                rear=rear->link;
+                array4PCB[doneIndex4PCB]->belong2Index=0;
+                array4PCB[doneIndex4PCB]->timeSlot=multi[0]->timeSlot;
+            }
+            rear->link=NULL;//todo why this is important
+            if(doneIndex4PCB>FirstInsertIndex)return 1;
         }
         return 0;
     }
