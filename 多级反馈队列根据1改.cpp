@@ -1,8 +1,7 @@
     #include "stdio.h"
     #include <stdlib.h>
     #include <conio.h>
-    int  timeSlot=0;
-    int  relativeTime=0;
+    int  relativeTime=0;//实时时间
     struct pcb { /* 定义进程控制块PCB */
         char name[10];
         char state;
@@ -11,22 +10,22 @@
         int needTime;
         int runTime;
         struct pcb* link= NULL;
-
-        int timeSlot;
-        int belong2Index;
-    }*ready = NULL, *processorInRunning=NULL;
+        int belong2Index;//属于第几级队列
+        int timeSlot;//该级队列的时间片长度
+    }*processorInRunning=NULL;
     typedef struct pcb PCB;
     PCB** array4PCB;
-    int amount4PCBArray=0;
-    int doneIndex4PCB=0;
+    int amount4PCBArray=0;//总共几个进程
+    int doneIndex4PCB=0;//当前实时时间到达了多少个进程
 
-    double* array4Time;
-    int doneIndex4Time=0;
-    int FirstInsertIndex=-1;
+    double* array4Time;//用于记录周转时间的数组
+    int doneIndex4Time=0;//记录第n个周转时间的索引
+    int FirstInsertIndex=-1;//和doneIndex配合用于判断有无发生插入
 
-    PCB** multi;
-    int amount4Multi=0;
+    PCB** multi;//多级反馈队列队头指针
+    int amount4Multi=0;//共多少级队列
         moveDown(){
+        //进程完成一个时间片后的移动
             PCB* son,*rear;
             int index=processorInRunning->belong2Index;
             son=processorInRunning;
@@ -43,11 +42,13 @@
             }
         }
         int judgeNULL(){
+        //找出首个该执行的进程所在队列级别
             int index=0;
             for(;index<amount4Multi&&multi[index]->link==NULL;index++);
             return index;
         }
         PCB* extract(){
+        //从多级队列中找出应该执行的进程
             int index=judgeNULL();
             PCB* son=NULL;
             if(index<amount4Multi){
@@ -61,20 +62,18 @@
     int operateReady(){
         int nowIndex=amount4Multi;
         if(processorInRunning!=NULL)nowIndex=processorInRunning->belong2Index;
-        //全为空
-        if(nowIndex==amount4Multi){
-            //现在被单线程占据的话就先执行单线程吧,时间还没到
-            if(processorInRunning==NULL&&doneIndex4PCB<amount4PCBArray){
+        if(nowIndex==amount4Multi){//processorInRunning==NULL&&现在被单线程占据的话就先执行单线程吧,时间还没到
+            if(doneIndex4PCB<amount4PCBArray){
+            //跳过中间的空白时间
                 multi[0]->link=array4PCB[doneIndex4PCB];
                 array4PCB[doneIndex4PCB]->belong2Index=0;
                 array4PCB[doneIndex4PCB]->timeSlot=multi[0]->timeSlot;
                 relativeTime=array4PCB[doneIndex4PCB]->arriveTime;
                 doneIndex4PCB++;
                 FirstInsertIndex=doneIndex4PCB;
-                //return 1;
             }
             nowIndex=0;
-                //在第一队一个时间片发生中间的都插入
+            //在第一队一个时间片中间到达的都要插入
             PCB  *rear=multi[0];
             for(;rear!=NULL&&rear->link!=NULL;rear=rear->link);
             if(doneIndex4PCB<amount4PCBArray&&
@@ -99,7 +98,7 @@
             if(nowIndex!=0){
                 if(doneIndex4PCB<amount4PCBArray&&
                 array4PCB[doneIndex4PCB]->arriveTime<=relativeTime+multi[nowIndex]->timeSlot){
-                                FirstInsertIndex=doneIndex4PCB;
+                        FirstInsertIndex=doneIndex4PCB;
                     rear->link=array4PCB[doneIndex4PCB];
                     rear=rear->link;
                     array4PCB[doneIndex4PCB]->belong2Index=0;
@@ -215,12 +214,12 @@
         //初始化
         if(doneIndex4PCB==0)operateReady();
         nowIndex=judgeNULL();
-        //todo nowIndex==amount4Multi
         if(nowIndex!=amount4Multi)processorInRunning=extract();
         if(processorInRunning==NULL){printf("processorInRunning==NULL\n");return;}
         if(0==operateReady()){
-            //没用完一个时间片就执行完毕
+            //没发生插入
             if (processorInRunning->runTime + processorInRunning->timeSlot >= processorInRunning->needTime){
+            //没用完一个时间片就执行完毕
                 relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
                 processorInRunning->finishTime=relativeTime;//!!!!!!!!!!!!!
                 processorInRunning->runTime=processorInRunning->needTime;
@@ -236,9 +235,10 @@
             showMultiArray();
         }
         else{
-            //一直插入
+            //时间片中发生插入
             if (processorInRunning->runTime + array4PCB[FirstInsertIndex]->arriveTime - relativeTime >= processorInRunning->needTime){
-                                                FirstInsertIndex++;
+            //插入之前已完成
+                    FirstInsertIndex++;
                 relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
                 processorInRunning->finishTime=relativeTime;//!
                 processorInRunning->runTime=processorInRunning->needTime;
@@ -259,14 +259,16 @@
                     temp->link->link=NULL;//todo why
                 }
                 else{
-                    //todo 乱打的补丁if针对 2 2,3 3 0,7 6,2 7,1
+                    //0级队列
                     if (processorInRunning->runTime + processorInRunning->timeSlot >= processorInRunning->needTime){
+                        //没用完一个时间片就执行完毕
                         relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
                         processorInRunning->finishTime=relativeTime;//!!!!!!!!!!!!!
                         processorInRunning->runTime=processorInRunning->needTime;
                         destroy(); //* 调用destroy函数*//*
                     }
                     else{
+                    //执行完一个时间片
                         relativeTime += processorInRunning->timeSlot;
                         processorInRunning->runTime = processorInRunning->runTime+ processorInRunning->timeSlot;
                         processorInRunning->state = 'w';
