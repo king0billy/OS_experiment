@@ -6,8 +6,8 @@
     int pageArray[MAXSIZE]; //页地址流数组
 
     typedef struct Block{
-        int blockID; //物理主存块号
-        int pageID; //块中装进的虚存页号
+        int blockID; //主存物理块号
+        int pageID; //块中装进的虚存页号,初始值为-1
         int firstInIndex;//首次调入内存的指令index,初始值为MAXSIZE+1
         int leastRecentlyUsedIndex;//最后一次使用的指令index初始值为-99
         struct Block *next;
@@ -26,13 +26,13 @@
         }
         printf("\n");
     }
-    int commonPack(int pageID, int instructionID, int NO,Block *pointer){
     //没发生置换的通用代码块,实现功能聚合的代码复用
+    int commonPack(int pageID, int instructionID, int NO,Block *pointer){
         for(int i = 0; i < blockNumber; i++) {
             //块为空闲
             if(pointer->pageID == -1) {
                 pointer->pageID = pageID;
-                pageFaultCount++; //缺页次数+1R
+                pageFaultCount++; //缺页次数+1
                 print(pageID,instructionID,NO,pointer,"T");
                 pointer->firstInIndex=NO;
                 pointer->leastRecentlyUsedIndex=NO;
@@ -63,7 +63,7 @@
             blockList[i]->next=blockList[(i+1)%blockNumber];
         }
         for(int i = 0; i < MAXSIZE; ) {
-        //初始化地址流//没说指令不能重复,0,320都出现了,如27出现了两次
+        //初始化地址流//指令可能能重复,0和MAXSIZE都出现了,27也出现了两次
             int m = rand() % MAXSIZE;
             instructionArray[i] = m + 1;
             pageArray[i] = instructionArray[i] / 10;
