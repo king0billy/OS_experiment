@@ -5,7 +5,7 @@
     //#define NULL 0
     int  timeSlot=0;
     int  relativeTime=0;
-    struct pcb { /* ¶¨Òå½ø³Ì¿ØÖÆ¿éPCB */
+    struct pcb { /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¿ï¿½ï¿½Æ¿ï¿½PCB */
         char name[10];
         char state;
         int arriveTime=0;
@@ -20,26 +20,6 @@
     int doneIndex4Time=0;
     int doneIndex4PCB=0;
     int number4Array=0;
-    //operateReady() /* ½¨Á¢¶Ô½ø³Ì½øÐÐÓÅÏÈ¼¶ÅÅÁÐº¯Êý*/
-    //{
-    //
-    //	PCB *first, *rear;
-    //
-    //	if (ready == NULL)
-    //	{
-    //		processorInRunning->link = ready;
-    //		ready = processorInRunning;
-    //	}
-    //	else /* ½ø³Ì±È½ÏÓÅÏÈ¼¶,²åÈëÊÊµ±µÄÎ»ÖÃÖÐ*/
-    //	{
-    //		first=ready;
-    //		for(rear=ready;rear->link!=NULL;rear=rear->link);
-    //		processorInRunning->link=NULL;
-    //		rear->link=processorInRunning;
-    //		first=first->link;
-    //	}
-    //
-    //}
     operateReady(){
         if(ready==NULL){
             if(processorInRunning==NULL&&doneIndex4PCB<number4Array){
@@ -67,27 +47,25 @@
                 rear->link=processorInRunning;
         }
     }
-    /* ½¨Á¢½ø³Ì¿ØÖÆ¿éº¯Êý*/
+    /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¿ï¿½ï¿½Æ¿éº¯ï¿½ï¿½*/
     input() {
-        //system("cls");
-        //clrscr(); /*ÇåÆÁ*/
-        printf("ÇëÊäÈë½ø³Ìtotal number? ");
+        printf("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½total number? ");
         scanf("%d", &number4Array);
         printf("\n");
         Array4Time=(double*)malloc(number4Array*sizeof(int));
         Array4PCB=(pcb**)malloc(number4Array*sizeof(processorInRunning));
         for (int i = 0; i<number4Array; i++){
-            printf("½ø³ÌºÅNo.%d:", i);
+            printf("ï¿½ï¿½ï¿½Ìºï¿½No.%d:", i);
             processorInRunning = getpch(PCB);
-    /*		printf("\n ÊäÈë½ø³ÌÃû:");
+    /*		printf("\n ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:");
             scanf("%s", processorInRunning->name);*/
             processorInRunning->name[0]=(char)(i+'0');
             processorInRunning->name[1]='\0';
-    //		printf("\n ÊäÈë½ø³ÌÓÅÏÈÊý:");
+    //		printf("\n ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:");
     //		scanf("%d", &processorInRunning->super);
-            printf("ÊäÈëarriveTime:");
+            printf("ï¿½ï¿½ï¿½ï¿½arriveTime:");
             scanf("%d", &processorInRunning->arriveTime);
-            printf(" ÊäÈë½ø³ÌÔËÐÐÊ±¼äin need : ");
+            printf(" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½in need : ");
             scanf("%d", &processorInRunning->needTime);
             printf("\n");
             processorInRunning->runTime = 0; processorInRunning->state = 'w';
@@ -95,7 +73,7 @@
             Array4PCB[i]=processorInRunning;
             Array4Time[i]=0;
         }
-        // Ñ¡ÔñÅÅÐò
+        // Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         pcb* minP=Array4PCB[0];pcb* tempP=Array4PCB[0];
         for(int i=0,minI=i;i<number4Array;i++){
             minI=i;
@@ -108,11 +86,8 @@
                     tempP=Array4PCB[i];Array4PCB[i]=minP;Array4PCB[minI]=tempP;
                 }
             }
-        for(int i=0;i<number4Array;i++){
-            printf("i=%d,arriveTime=%d\n",i,Array4PCB[i]->arriveTime);
-        }
         processorInRunning=NULL;
-        operateReady(); /* µ÷ÓÃsortº¯Êý*/
+        operateReady();
     }
     int space(){
         int length = 0; PCB* pr = ready;
@@ -122,7 +97,7 @@
         }
         return(length);
     }
-    /*½¨Á¢½ø³ÌÏÔÊ¾º¯Êý,ÓÃÓÚÏÔÊ¾µ±Ç°½ø³Ì*/
+    /*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½*/
     disp(PCB * pr) {
         printf("\n qname\t state\t ndtime\t runTime\t arriveTime\t finishTime\t relativeTime\t timeSlot\n");
         printf("|%s\t", pr->name);
@@ -134,52 +109,50 @@
         printf("\t|%d\t", relativeTime);
         printf("\t|%d\t", timeSlot);
     }
-    /* ½¨Á¢½ø³Ì²é¿´º¯Êý */
+    /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì²é¿´ï¿½ï¿½ï¿½ï¿½ */
     check() {
         PCB* pr;
-        printf("\n **** µ±Ç°ÕýÔÚÔËÐÐµÄ½ø³ÌÊÇ:%s", processorInRunning->name); /*ÏÔÊ¾µ±Ç°ÔËÐÐ½ø³Ì*/
+        printf("\n **** ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÐµÄ½ï¿½ï¿½ï¿½ï¿½ï¿½:%s", processorInRunning->name); /*ï¿½ï¿½Ê¾ï¿½ï¿½Ç°ï¿½ï¿½ï¿½Ð½ï¿½ï¿½ï¿½*/
         disp(processorInRunning);
         printf("\n relativeTime is the time at starting this slice!");
         pr = ready;
-        printf("\n ****µ±Ç°¾ÍÐ÷¶ÓÁÐ×´Ì¬Îª:\n"); /*ÏÔÊ¾¾ÍÐ÷¶ÓÁÐ×´Ì¬*/
+        printf("\n ****ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬Îª:\n"); /*ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬*/
         while (pr != NULL){
             disp(pr);
             pr = pr->link;
         }
         printf("\n relativeTime is the time at starting this slice!\n");
     }
-    /*½¨Á¢½ø³Ì³·Ïûº¯Êý(½ø³ÌÔËÐÐ½áÊø,³·Ïû½ø³Ì)*/
+    /*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)*/
     destroy() {
-        printf("\n ½ø³Ì [%s] ÒÑÍê³É.", processorInRunning->name);
+        printf("\n ï¿½ï¿½ï¿½ï¿½ [%s] ï¿½ï¿½ï¿½ï¿½ï¿½.", processorInRunning->name);
         //disp(processorInRunning);
         Array4Time[doneIndex4Time++]=(processorInRunning->finishTime - processorInRunning->arriveTime)*1.0/processorInRunning->needTime;
-        printf("\n ½ø³Ì [%s] µÄ´øÈ¨ÖÜ×ªÊ±¼äÎª=%lf", processorInRunning->name,Array4Time[doneIndex4Time-1]);
+        printf("\n ï¿½ï¿½ï¿½ï¿½ [%s] ï¿½Ä´ï¿½È¨ï¿½ï¿½×ªÊ±ï¿½ï¿½Îª=%lf", processorInRunning->name,Array4Time[doneIndex4Time-1]);
         free(processorInRunning);
         processorInRunning=NULL;
     }
-    /* ½¨Á¢½ø³Ì¾ÍÐ÷º¯Êý(½ø³ÌÔËÐÐÊ±¼äµ½,ÖÃ¾ÍÐ÷×´Ì¬*/
+    /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½äµ½,ï¿½Ã¾ï¿½ï¿½ï¿½×´Ì¬*/
     running() {
-    /*    if(processorInRunning==NULL)operateReady();*/
         if (processorInRunning->runTime+timeSlot >= processorInRunning->needTime){
             relativeTime  +=  processorInRunning->needTime  -  processorInRunning->runTime;
             processorInRunning->finishTime=relativeTime;//!!!!!!!!!!!!!
             processorInRunning->runTime=processorInRunning->needTime;
-            destroy(); /* µ÷ÓÃdestroyº¯Êý*/
+            destroy();
         }
         else{
             relativeTime+=timeSlot;
             processorInRunning->runTime = processorInRunning->runTime+timeSlot;
             processorInRunning->state = 'w';
-            operateReady(); /*µ÷ÓÃsortº¯Êý*/
+            operateReady();
         }
-
     }
-    /*Ö÷º¯Êý*/
+    /*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*/
     main() {
         int lengthOfReady, h = 0;
         char ch;
             relativeTime=0;
-            printf("ÇëÊäÈëtime slice? ");
+            printf("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½time slice? ");
             scanf("%d", &timeSlot);
         input();
         lengthOfReady = space();
@@ -205,15 +178,15 @@
                 check();
                 operateReady();
             }
-            printf("\n °´ÈÎÒ»¼ü¼ÌÐø......");
+            printf("\n ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½......");
             ch = getchar();
         }
-        printf("\n\n ½ø³ÌÒÑ¾­Íê³É.\n");
+        printf("\n\n ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½.\n");
         double sum=0;
         for(int i=0;i<number4Array;i++){
             sum+=Array4Time[i];
         }
-        printf("\n Æ½¾ù´øÈ¨ÖÜ×ªÊ±¼äÎª=%lf\n", sum/number4Array);
+        printf("\n Æ½ï¿½ï¿½ï¿½ï¿½È¨ï¿½ï¿½×ªÊ±ï¿½ï¿½Îª=%lf\n", sum/number4Array);
         ch = getchar();
         ch = getchar();
     }
