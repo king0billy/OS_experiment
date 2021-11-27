@@ -11,14 +11,10 @@ struct partitionNode{
 	struct partitionNode* previous;
 	struct partitionNode* next;
 };
-
 struct partitionNode* headNode;
-struct partitionNode* getAPartition() {
-	return (struct partitionNode*)malloc(sizeof(struct partitionNode));
-}
 
 struct partitionNode* initPartition() {
-	struct partitionNode* pointer = getAPartition();
+	struct partitionNode* pointer = (struct partitionNode*)malloc(sizeof(struct partitionNode));
 	pointer->startingAddress = 0;
 	pointer->size = MAXSIZE;
 	pointer->status = 0;
@@ -28,21 +24,19 @@ struct partitionNode* initPartition() {
 	return pointer;
 }
 
-
 //在链表位置p处为编号为processID，大小为processSize的作业分配空间
 int allocate(int processID, int processSize, struct partitionNode* pointer) {
 	if (pointer == NULL){
 	    //没有空闲内存了,分配失败
 		return 0;
 	}
-
 	if (pointer->size == processSize) {
 	    //分配整块的分区
 		pointer->status = 1;
 		pointer->processID = processID;
 	} else {
 	    //分割空闲的内存再分配
-		struct partitionNode* newPartition = getAPartition();
+		struct partitionNode* newPartition = (struct partitionNode*)malloc(sizeof(struct partitionNode));
 		newPartition->startingAddress = pointer->startingAddress + processSize;
 		newPartition->size = pointer->size - processSize;
 		newPartition->status = 0;
@@ -63,13 +57,11 @@ int allocate(int processID, int processSize, struct partitionNode* pointer) {
 //首次适应算法
 struct partitionNode* firstFitFindFreePartition(int processSize) {
 	struct partitionNode* pointer = headNode;
-
 	while (pointer) {
 		if (pointer->status == 0 && pointer->size >= processSize)
 			return pointer;
 		pointer = pointer->next;
 	}
-
 	return NULL;
 }
 
@@ -84,7 +76,6 @@ int firstFitAllocation(int processID, int processSize) {
 struct partitionNode* bestFitFindFreePartition(int processSize) {
 	struct partitionNode* pointer = headNode; struct partitionNode* minPointer = NULL;
 	int minSize = MAXSIZE + 1;
-
 	while (pointer) {
 		if (pointer->status == 0 && pointer->size >= processSize) {
 			if (pointer->size < minSize) {
@@ -179,10 +170,10 @@ void displayAllocation() {
 
 void inputControl(int (*allocateAlgorithm)(int,int)) {
     //传入的参数是一个函数
+    char T[5];
+    do{
 	printf("申请按 1 释放按 2 退出按 9\n");
-	char T[5];
 	scanf("%s", T);
-	while (T[0] != '9') {
 		if (T[0] == '1') {
 			int processID, size;
 			printf("输入要申请空间的作业id: ");
@@ -209,12 +200,8 @@ void inputControl(int (*allocateAlgorithm)(int,int)) {
                     printf("未找到相关作业，释放失败\n\n");
                 }
 		    }
-		    else{
-			    exit(0);
-			}
 		}
-		scanf("%s", T);
-	}
+	}while(T[0]!='9');
 }
 
 
@@ -232,18 +219,12 @@ void selectAlgorithm() {
 	system("cls");
 	printf("按1_首次适应算法                ");
 	printf("按2_最佳适应算法             \n");
-
 	char op[20];
-	//printf(">  ");
 	scanf("%s", op);
-
 	if (!strcmp(op, "1"))
 		firstFitAllocationControl();
 	else if (!strcmp(op, "2"))
 		bestFitAllocationControl();
-	else {
-		exit(0);
-	}
 }
 
 int main()
