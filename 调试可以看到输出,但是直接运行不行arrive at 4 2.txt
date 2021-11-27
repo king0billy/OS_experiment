@@ -1,0 +1,299 @@
+请输入amount4Multi?  2
+请输入0级队列的timeSlot  2
+请输入1级队列的timeSlot  3
+前1均为 FCFS ,第2为 RR
+请输入进程total number? 5
+
+进程号No.0:输入arriveTime:0
+ 输入进程运行时间in need : 8
+
+进程号No.1:输入arriveTime:0
+ 输入进程运行时间in need : 9
+
+进程号No.2:输入arriveTime:4
+ 输入进程运行时间in need : 5
+
+进程号No.3:输入arriveTime:2
+ 输入进程运行时间in need : 9
+
+进程号No.4:输入arriveTime:
+8
+ 输入进程运行时间in need : 7
+
+i=0,arriveTime=0
+i=1,arriveTime=0
+i=2,arriveTime=2
+i=3,arriveTime=2
+i=4,arriveTime=8
+
+qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |R      |8      |2              |0              |-1163005939            |2              |2
+ **** 当前正在运行的进程是:0
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |w      |8      |2              |0              |-1163005939            |2              |3
+ relativeTime is the time at starting this slice!
+ ****当前就绪队列0状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |0              |0              |-1163005939            |2              |2
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |0              |2              |-1163005939            |2              |2
+ ****当前就绪队列1状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |w      |8      |2              |0              |-1163005939            |2              |3
+ relativeTime is the time at starting this slice!
+
+ 按任一键继续......
+
+
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |R      |9      |2              |0              |-1163005939            |4              |2
+ **** 当前正在运行的进程是:1
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |2              |0              |-1163005939            |4              |3
+ relativeTime is the time at starting this slice!
+ ****当前就绪队列0状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |0              |2              |-1163005939            |4              |2
+ ****当前就绪队列1状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |w      |8      |2              |0              |-1163005939            |4              |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |2              |0              |-1163005939            |4              |3
+ relativeTime is the time at starting this slice!
+
+ 按任一键继续......
+
+
+ **** 当前正在运行的进程是:3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |2              |2              |-1163005939            |6              |3
+ relativeTime is the time at starting this slice!
+ ****当前就绪队列0状态为:
+ ****当前就绪队列1状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |w      |8      |2              |0              |-1163005939            |6              |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |2              |0              |-1163005939            |6              |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |2              |2              |-1163005939            |6              |3
+ relativeTime is the time at starting this slice!
+
+ 按任一键继续......
+
+
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |R      |8      |4              |0              |-1163005939            |8              |3
+ **** 当前正在运行的进程是:0
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |w      |8      |4              |0              |-1163005939            |8              |3
+ relativeTime is the time at starting this slice!
+ ****当前就绪队列0状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|4      |w      |7      |0              |8              |-1163005939            |8              |2
+ ****当前就绪队列1状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |2              |0              |-1163005939            |8              |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |2              |2              |-1163005939            |8              |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |w      |8      |4              |0              |-1163005939            |8              |3
+ relativeTime is the time at starting this slice!
+
+ 按任一键继续......
+
+
+ **** 当前正在运行的进程是:4
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|4      |w      |7      |2              |8              |-1163005939            |10             |3
+ relativeTime is the time at starting this slice!
+ ****当前就绪队列0状态为:
+ ****当前就绪队列1状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |2              |0              |-1163005939            |10             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |2              |2              |-1163005939            |10             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |w      |8      |4              |0              |-1163005939            |10             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|4      |w      |7      |2              |8              |-1163005939            |10             |3
+ relativeTime is the time at starting this slice!
+
+ 按任一键继续......
+
+
+ **** 当前正在运行的进程是:1
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |5              |0              |-1163005939            |13             |3
+ relativeTime is the time at starting this slice!
+ ****当前就绪队列0状态为:
+ ****当前就绪队列1状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |2              |2              |-1163005939            |13             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |w      |8      |4              |0              |-1163005939            |13             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|4      |w      |7      |2              |8              |-1163005939            |13             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |5              |0              |-1163005939            |13             |3
+ relativeTime is the time at starting this slice!
+
+ 按任一键继续......
+
+
+ **** 当前正在运行的进程是:3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |5              |2              |-1163005939            |16             |3
+ relativeTime is the time at starting this slice!
+ ****当前就绪队列0状态为:
+ ****当前就绪队列1状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |w      |8      |4              |0              |-1163005939            |16             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|4      |w      |7      |2              |8              |-1163005939            |16             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |5              |0              |-1163005939            |16             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |5              |2              |-1163005939            |16             |3
+ relativeTime is the time at starting this slice!
+
+ 按任一键继续......
+
+
+ **** 当前正在运行的进程是:0
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |w      |8      |7              |0              |-1163005939            |19             |3
+ relativeTime is the time at starting this slice!
+ ****当前就绪队列0状态为:
+ ****当前就绪队列1状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|4      |w      |7      |2              |8              |-1163005939            |19             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |5              |0              |-1163005939            |19             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |5              |2              |-1163005939            |19             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |w      |8      |7              |0              |-1163005939            |19             |3
+ relativeTime is the time at starting this slice!
+
+ 按任一键继续......
+
+
+ **** 当前正在运行的进程是:4
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|4      |w      |7      |5              |8              |-1163005939            |22             |3
+ relativeTime is the time at starting this slice!
+ ****当前就绪队列0状态为:
+ ****当前就绪队列1状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |5              |0              |-1163005939            |22             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |5              |2              |-1163005939            |22             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |w      |8      |7              |0              |-1163005939            |22             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|4      |w      |7      |5              |8              |-1163005939            |22             |3
+ relativeTime is the time at starting this slice!
+
+ 按任一键继续......
+
+
+ **** 当前正在运行的进程是:1
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |8              |0              |-1163005939            |25             |3
+ relativeTime is the time at starting this slice!
+ ****当前就绪队列0状态为:
+ ****当前就绪队列1状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |5              |2              |-1163005939            |25             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |w      |8      |7              |0              |-1163005939            |25             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|4      |w      |7      |5              |8              |-1163005939            |25             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |8              |0              |-1163005939            |25             |3
+ relativeTime is the time at starting this slice!
+
+ 按任一键继续......
+
+
+ **** 当前正在运行的进程是:3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |8              |2              |-1163005939            |28             |3
+ relativeTime is the time at starting this slice!
+ ****当前就绪队列0状态为:
+ ****当前就绪队列1状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |w      |8      |7              |0              |-1163005939            |28             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|4      |w      |7      |5              |8              |-1163005939            |28             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |8              |0              |-1163005939            |28             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |8              |2              |-1163005939            |28             |3
+ relativeTime is the time at starting this slice!
+
+ 按任一键继续......
+
+
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|0      |R      |8      |8              |0              |29             |29             |3
+ 进程 [0] 已完成.
+ 进程 [0] 的带权周转时间为=3.625000
+ ****当前就绪队列0状态为:
+ ****当前就绪队列1状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|4      |w      |7      |5              |8              |-1163005939            |29             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |8              |0              |-1163005939            |29             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |8              |2              |-1163005939            |29             |3
+ relativeTime is the time at starting this slice!
+
+ 按任一键继续......
+
+
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|4      |R      |7      |7              |8              |31             |31             |3
+ 进程 [4] 已完成.
+ 进程 [4] 的带权周转时间为=3.285714
+ ****当前就绪队列0状态为:
+ ****当前就绪队列1状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |w      |9      |8              |0              |-1163005939            |31             |3
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |8              |2              |-1163005939            |31             |3
+ relativeTime is the time at starting this slice!
+
+ 按任一键继续......
+
+
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|1      |R      |9      |9              |0              |32             |32             |3
+ 进程 [1] 已完成.
+ 进程 [1] 的带权周转时间为=3.555556
+ ****当前就绪队列0状态为:
+ ****当前就绪队列1状态为:
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |w      |9      |8              |2              |-1163005939            |32             |3
+ relativeTime is the time at starting this slice!
+
+ 按任一键继续......
+
+
+ qname   state   ndtime  runTime         arriveTime      finishTime      relativeTime    timeSlot
+|3      |R      |9      |9              |2              |33             |33             |3
+ 进程 [3] 已完成.
+ 进程 [3] 的带权周转时间为=3.444444
+ ****当前就绪队列0状态为:
+ ****当前就绪队列1状态为:
+ relativeTime is the time at starting this slice!
+
+ 按任一键继续......
+
+ 进程已经完成.
+
+ 平均带权周转时间为=2.782143
+
+
+
+ 进程已经完成.
